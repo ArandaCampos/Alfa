@@ -5,26 +5,23 @@
 #   ALFA
 #
 #   - Falta:
-#       - Transferir parâmetros imutáveis para as Class
-#               - Manter aqui: instância dos objetos e as posições
 #       - Página inicial
 #       - Página de ranqueamento
 #--------------------------------------
 
-import pygame
-import os
-import random
-import csv
+import pygame, os, random, csv
 from read_word import read_word
 from toggle_letter import Toggle_letter
 from components import Button_cancel, Button_send, Score, Sound, Figure
 
 # Paleta de cores
 BG_COLOR = (222, 239, 231, .94)
-
 # Altura e largura da tela
 HEIGHT, WIDTH = 648, 800
-
+# Carregar diretório "Images"
+ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+AUD_PATH = os.path.join(ABS_PATH, 'Audio')
+# Dados leidos do .csv
 DATA = []
 
 # carregar dados do jogo
@@ -34,33 +31,32 @@ def loading_data(file_data):
         for words in text:
             DATA.append(words)
 
-class Window():
+class Game():
     pygame.init()
-    def __init__(self,
+    def __init__(self, screen,
                  option: (str),
                 ):
         # Parâmetros de aparência
-        self.size = (WIDTH, HEIGHT)
         self.bg_color = BG_COLOR
-        self.title = 'ALFA'
-
+        self.title = 'ALFA - JOGO'
+        # Componentes
         self.sound = None
         self.score_board = None
         self.button_cancel = None
         self.button_send = None
         self.word = None
         self.figure = None
-        self.sound_win = pygame.mixer.Sound(os.path.join(AUDIO_PATH, 'win.wav'))
-        self.sound_fail = pygame.mixer.Sound(os.path.join(AUDIO_PATH, 'failed.wav'))
+        self.sound_win = pygame.mixer.Sound(os.path.join(AUD_PATH, 'win.wav'))
+        self.sound_fail = pygame.mixer.Sound(os.path.join(AUD_PATH, 'failed.wav'))
         # Parâmetros do jogo
-        self.screen = None
-        self.play = True
+        self.screen = screen
         # Gabarito da rodada
+        #self.stage = 0
         self.round = 0
         self.option = option
 
     def init(self):
-        self.screen = pygame.display.set_mode(self.size)
+        loading_data('Data/data_a.csv')
         self.shuffle_data()
         self.load_word()
         self.load_sound()
@@ -85,7 +81,7 @@ class Window():
         self.figure.init()
 
     def load_sound(self):
-        self.sound = Sound(self.screen, "sound.png", [self.word.margins[0][0] + self.word.size[0], 390 + self.word.size[1] / 2])
+        self.sound = Sound(self.screen, [self.word.margins[0][0] + self.word.size[0], 390 + self.word.size[1] / 2])
         self.sound.init()
 
     def load_score(self):
@@ -93,7 +89,6 @@ class Window():
         self.score_board.init()
 
     def load_btn_cancel(self):
-        #Botão Cancel
         self.button_cancel = Button_cancel(self.screen)
         self.button_cancel.init()
 
@@ -111,43 +106,39 @@ class Window():
         self.sound.draw() if self.sound else None
         pygame.display.flip()
 
-    def get_event(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.play = False
-            # Comando de botão
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    self.word.toggle_value(increment=True)
-                elif event.key == pygame.K_DOWN:
-                    self.word.toggle_value(decrement=True)
-                elif event.key == pygame.K_RIGHT:
-                    self.word.toggle_key(increment=True)
-                elif event.key == pygame.K_LEFT:
-                    self.word.toggle_key(decrement=True)
-                elif event.key == pygame.K_RETURN:
-                    if self.word.response():
-                        self.sound_win.play()
-                        self.score_board.update(increment=True)
-                    else:
-                        self.sound_fail.play()
-                    self.next_round()
+    def get_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                self.word.toggle_value(increment=True)
+            elif event.key == pygame.K_DOWN:
+                self.word.toggle_value(decrement=True)
+            elif event.key == pygame.K_RIGHT:
+                self.word.toggle_key(increment=True)
+            elif event.key == pygame.K_LEFT:
+                self.word.toggle_key(decrement=True)
+            elif event.key == pygame.K_RETURN:
+                if self.word.response():
+                    self.sound_win.play()
+                    self.score_board.update(increment=True)
                 else:
-                    self.word.toggle_value(letter=event.unicode)
-            # Comandos de mouse
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if self.sound.image.rendered.get_rect(center=self.sound.image.get_center()).collidepoint(pygame.mouse.get_pos()):
-                    read_word(self.word.get_word())
-                elif self.button_send.button.rendered.collidepoint(pygame.mouse.get_pos()):
-                    if self.word.response():
-                        self.sound_win.play()
-                        self.score_board.update(increment=True)
-                    else:
-                        self.sound_fail.play()
-                    self.next_round()
-                elif self.button_cancel.button.rendered.collidepoint(pygame.mouse.get_pos()):
                     self.sound_fail.play()
-                    self.next_round()
+                self.next_round()
+            else:
+                self.word.toggle_value(letter=event.unicode)
+            # Comandos de mouse
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if self.sound.image.rendered.get_rect(center=self.sound.image.get_center()).collidepoint(pygame.mouse.get_pos()):
+                read_word(self.word.get_word())
+            elif self.button_send.button.rendered.collidepoint(pygame.mouse.get_pos()):
+                if self.word.response():
+                    self.sound_win.play()
+                    self.score_board.update(increment=True)
+                else:
+                    self.sound_fail.play()
+                self.next_round()
+            elif self.button_cancel.button.rendered.collidepoint(pygame.mouse.get_pos()):
+                self.sound_fail.play()
+                self.next_round()
 
     def exit(self):
         pygame.quit()
@@ -169,13 +160,13 @@ if __name__ == '__main__':
     option = (('A', 'E', 'I', 'O', 'U'),
               ('BA', 'BE', 'BI', 'BO', 'BU'))
 
-    file_names = ['Data/data.csv', 'Data/data_b.csv']
-    print(" ############ ALFABETIZAÇÃO ############ \n\n 1) Vogais \n 2) Letra B\n")
+    file_names = ['Data/data_a.csv', 'Data/data_b.csv']
+    print('************ MENU - ALFA ***********\n\n 1) Vogais \n 2) Letra B\n')
     while stage not in stages:
         stage = int(input(" Opção: "))
     file_data = file_names[stage - 1]
 
     loading_data(file_data)
-    window = Window(option = option[stage - 1])
+    window = Game(option = option[stage - 1])
     window.init()
     run(window)

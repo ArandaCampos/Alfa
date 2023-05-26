@@ -27,21 +27,19 @@ class Figure():
     def draw(self):
         self.image.draw()
 
-#### Arrumar o sound (instanciar o Image() e exluir o ABS_PATH e IMG_PATH)
 class Sound():
-    def __init__(self, screen, file: str, margins: [int, int], size: (int, int) = (31.4, 30), padding: int = 60):
+    def __init__(self, screen, margins: [int, int], padding: int = 60):
 
         self.screen = screen
 
         # Icone de áudio
-        self.image = Image(screen, 'sound.png', size)
-        self.size = size
+        self.image = Image(screen, 'sound.png', (31.4, 30))
         self.margins = margins
         self.padding = padding
 
     def init(self):
         self.image.init()
-        self.image.set_margins((self.margins[0] + self.padding, self.margins[1] - self.size[1] /2))
+        self.image.set_margins((self.margins[0] + self.padding, self.margins[1] - self.image.size[1] /2))
 
     def draw(self):
         self.image.draw()
@@ -85,7 +83,7 @@ class Button_send():
         self.label.init()
         self.label.set_margins((self.button.margins[0] + 35 , HEIGHT - 75 - self.label.size[1] / 2))
         self.image.init()
-        self.image.set_margins((WIDTH - 120 - 220 + self.button.size[0] - self.image.size[0] - 35, HEIGHT - 75 - self.image.size[1]/2))
+        self.image.set_margins((self.button.margins[0] + self.button.size[0] - self.image.size[0] - 35, HEIGHT - 75 - self.image.size[1]/2))
 
     def draw(self):
         self.button.draw()
@@ -119,3 +117,59 @@ class Score():
     def draw(self):
         self.text.draw()
         self.image.draw()
+
+class Button_play_game():
+    def __init__(self, screen):
+
+        self.screen = screen
+        # Botão
+        self.button = Box(screen, (220, 75), ((WIDTH - 220) / 2, HEIGHT - 75 - 50), ORANGE_LIGHT, 8)
+        # Etiqueta
+        self.label = Text(screen, 'JOGAR', 'Noto Mono', 20, WHITE)
+        # Ícone
+        self.image = Image(screen, 'play.png', (20,20))
+
+    def init(self):
+        self.button.init()
+        self.label.init()
+        self.label.set_margins((self.button.margins[0] + 35 , self.button.margins[1] + (75 - self.label.size[1]) / 2))
+        self.image.init()
+        self.image.set_margins((self.button.margins[0] + self.button.size[0] - self.image.size[0] - 35, self.button.margins[1] + (75 - self.image.size[1])/2))
+
+    def draw(self):
+        self.button.draw()
+        self.label.draw()
+        self.image.draw()
+
+"""
+class Rank():
+    def __init__(self,screen):
+
+        self.screen = screen
+        # Imagem
+        self.image = Image(screen, 'medal.png', (250, 250))
+        # Texto
+        self.text_1 = Text(screen, 'jogador    pontos', 'Noto Mono', 20, BLUE)
+        self.text_2 = Text(screen, 'Jogador 1    33', 'Noto Mono', 35, BLUE)
+        self.text_3 = Text(screen, 'Jogador 2    30', 'Noto Mono', 35, ORANGE_LIGHT)
+        self.text_4 = Text(screen, 'Jogador 3     5', 'Noto Mono', 35, BLUE)
+
+    def init(self):
+        self.image.init()
+        self.image.set_margins(((WIDTH - self.image.size[0]) / 2, 50))
+        self.text_1.init()
+        self.text_2.init()
+        self.text_3.init()
+        self.text_4.init()
+        self.text_1.set_margins(((WIDTH - self.text_1.size[0]) / 2, self.image.size[1] + self.image.margins[1] + 50))
+        self.text_2.set_margins(((WIDTH - self.text_2.size[0]) / 2, self.text_1.margins[1] + 50))
+        self.text_3.set_margins(((WIDTH - self.text_3.size[0]) / 2, self.text_2.margins [1] + 50))
+        self.text_4.set_margins(((WIDTH - self.text_4.size[0]) / 2, self.text_3.margins [1] + 50))
+
+    def draw(self):
+        self.image.draw()
+        self.text_1.draw()
+        self.text_2.draw()
+        self.text_3.draw()
+        self.text_4.draw()
+"""

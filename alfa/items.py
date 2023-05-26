@@ -39,7 +39,7 @@ class Image():
         self.screen.blit(self.rendered, self.margins)
 
 class Text():
-    def __init__(self, screen, txt: str, family: str, size_font: int, color: (int, int, int)):
+    def __init__(self, screen, txt: str, family: str, size_font: int, color: (int, int, int), bold: bool = False):
 
         self.screen = screen
         self.text = txt
@@ -49,20 +49,21 @@ class Text():
         self.size = 0
         self.color = color
         self.font = None
+        self.bold = bold
         # Position
         self.margins = 0
         # Render
         self.rendered = None
 
     def init(self):
-        self.font = pygame.font.SysFont(self.family, self.font_size)
+        self.font = pygame.font.SysFont(self.family, self.font_size, bold=self.bold)
         self.render()
 
     def set_text(self, txt: str):
         self.text = txt
 
-    def set_font(self, family: str, size: int):
-        self.font = pygame.font.SysFont(family, size)
+    def set_font(self, family: str, size: int, bold):
+        self.font = pygame.font.SysFont(family, size, bold=bold)
 
     def set_color(self, color: (int, int, int)):
         self.color = color
