@@ -107,7 +107,7 @@ class Score():
         self.image.init()
         self.image.set_margins((WIDTH - self.image.size[0]- 25, 25))
         self.text.init()
-        self.text.set_margins((WIDTH - self.image.size[0] - 25 - self.text.size[0] - 10, 25))
+        self.text.set_margins((WIDTH - self.image.size[0] - 25 - self.text.size[0] - 10, 25 + (42 - self.text.size[1])/2))
 
     def update(self, point: int = False, increment: bool = False, decrement: bool = False):
         if point: self.score = point

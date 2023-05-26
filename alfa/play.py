@@ -19,14 +19,8 @@ from read_word import read_word
 from toggle_letter import Toggle_letter
 from components import Button_cancel, Button_send, Score, Sound, Figure
 
-# Carregar diretório "Images"
-ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-IMG_PATH = os.path.join(ABS_PATH, 'Images')
-AUDIO_PATH = os.path.join(ABS_PATH, 'Audio')
-
 # Paleta de cores
-BG_COLOR, ORANGE, WHITE, BLUE = (222, 239, 231, .94), (250, 127, 8, .98), (240, 240, 242, .95), (1, 32, 48, 1.)
-ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 1.), (154, 235, 163, 1.)
+BG_COLOR = (222, 239, 231, .94)
 
 # Altura e largura da tela
 HEIGHT, WIDTH = 648, 800
@@ -58,38 +52,14 @@ class Window():
         self.figure = None
         self.sound_win = pygame.mixer.Sound(os.path.join(AUDIO_PATH, 'win.wav'))
         self.sound_fail = pygame.mixer.Sound(os.path.join(AUDIO_PATH, 'failed.wav'))
-
-        # Caixa de resposta
-#        self.box = None
-#        self.color_box = WHITE
-#        self.padding_box = 10
-#        self.margin_left_box = 0
-#        self.margin_top_box = 0
-#        self.size_box = [0, 80]
-#        self.border_radius_box = 12
-
         # Parâmetros do jogo
         self.screen = None
         self.play = True
-        self.score = 0
-
         # Gabarito da rodada
         self.round = 0
-        self.score = 0
         self.option = option
-        self.value = 0
-        self.answer = None
-
 
     def init(self):
-        """
-            Inicializa:
-                Tamanho
-                Título
-                Icones
-                Imagem
-        """
-        # self.screen = pygame.display.set_mode(self.size, pygame.RESIZABLE)
         self.screen = pygame.display.set_mode(self.size)
         self.shuffle_data()
         self.load_word()
@@ -199,7 +169,7 @@ if __name__ == '__main__':
     option = (('A', 'E', 'I', 'O', 'U'),
               ('BA', 'BE', 'BI', 'BO', 'BU'))
 
-    file_names = ['data.csv', 'data_b.csv']
+    file_names = ['Data/data.csv', 'Data/data_b.csv']
     print(" ############ ALFABETIZAÇÃO ############ \n\n 1) Vogais \n 2) Letra B\n")
     while stage not in stages:
         stage = int(input(" Opção: "))
