@@ -27,6 +27,21 @@ class Figure():
     def draw(self):
         self.image.draw()
 
+class Back_home():
+    def __init__(self, screen):
+
+        self.screen = screen
+        # Imagem
+        self.image = Image(screen, 'back.png', (32, 32))
+
+    def init(self):
+        self.image.init()
+        self.image.set_margins((25, 25))
+
+    def draw(self):
+        self.image.draw()
+
+
 class Sound():
     def __init__(self, screen, margins: [int, int], padding: int = 60):
 

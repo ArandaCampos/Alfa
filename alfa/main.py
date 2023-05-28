@@ -1,7 +1,6 @@
 import pygame, os, csv
 from game import Game
 from home import Home
-#from components import Menu, Title
 
 class Window():
     def __init__(self):
@@ -50,6 +49,10 @@ class Window():
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.pages['home'][1].button.button.rendered.collidepoint(pygame.mouse.get_pos()):
                     self.change_page('game')
+                elif self.pages['game'][1].back.image.rendered.get_rect(center=self.pages['game'][1].back.image.get_center()).collidepoint(pygame.mouse.get_pos()):
+                    self.change_page('home')
+
+
 
     def exit(self):
         pygame.quit()
@@ -63,7 +66,7 @@ def run(window):
         window.refresh_screen()
         window.get_event()
 
-    print('tchau')
+    print('OBRIGADO POR JOGAR <3')
     window.exit()
 
 if __name__ == '__main__':

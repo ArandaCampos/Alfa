@@ -12,7 +12,7 @@
 import pygame, os, random, csv
 from read_word import read_word
 from toggle_letter import Toggle_letter
-from components import Button_cancel, Button_send, Score, Sound, Figure
+from components import Button_cancel, Button_send, Score, Sound, Figure, Back_home
 
 # Paleta de cores
 BG_COLOR = (222, 239, 231, .94)
@@ -40,6 +40,7 @@ class Game():
         self.bg_color = BG_COLOR
         self.title = 'ALFA - JOGO'
         # Componentes
+        self.back = None
         self.sound = None
         self.score_board = None
         self.button_cancel = None
@@ -56,6 +57,8 @@ class Game():
         self.option = option
 
     def init(self):
+        self.back = Back_home(self.screen)
+        self.back.init()
         loading_data('Data/data_a.csv')
         self.shuffle_data()
         self.load_word()
@@ -98,12 +101,14 @@ class Game():
 
     def refresh_screen(self):
         self.screen.fill(self.bg_color)
+        self.back.draw() if self.back else None
         self.button_cancel.draw() if self.button_cancel else None
         self.button_send.draw() if self.button_send else None
         self.word.draw() if self.word else None
         self.score_board.draw() if self.score_board else None
         self.figure.draw() if self.figure else None
         self.sound.draw() if self.sound else None
+        pygame.display.set_caption(self.title)
         pygame.display.flip()
 
     def get_event(self, event):

@@ -11,6 +11,7 @@ class Home():
     def __init__(self, screen):
 
         self.screen = screen
+        self.caption = 'ALFA - MENU'
         # Título
         self.title = None
         # Botão
@@ -27,6 +28,7 @@ class Home():
         self.screen.fill(BG_COLOR)
         self.button.draw() if self.button else None
         self.title.draw() if self.title else None
+        pygame.display.set_caption(self.caption)
         pygame.display.flip()
 
     def get_event(self, event):
