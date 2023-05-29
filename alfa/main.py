@@ -1,6 +1,7 @@
-import pygame, os, csv
+import pygame, os
 from game import Game
 from home import Home
+from menu import Menu_page
 
 class Window():
     def __init__(self):
@@ -8,10 +9,11 @@ class Window():
         # Parâmetros da tela
         self.screen = None
         self.size = (800, 648)
-        self.caption = 'ALFA - MENU INICIAL'
+        self.caption = 'ALFA - PÁGINA INICIAL'
         # Páginas
         self.pages = {
             'home': [False, None],
+            'menu': [False, None],
             'game': [False, None],
             'rank': [False, None],
             'conf': [False, None]
@@ -22,8 +24,9 @@ class Window():
     def init(self):
         self.screen = pygame.display.set_mode(self.size)
         pygame.display.set_caption(self.caption)
-        self.pages['game'] = [False, Game(self.screen, ('A', 'E', 'I', 'O', 'U'))]
-        self.pages['game'][1].init()
+        self.pages['game'] = [False, Game(self.screen)]
+        self.pages['menu'] = [False, Menu_page(self.screen)]
+        self.pages['menu'][1].init()
         self.pages['home'] = [True, Home(self.screen)]
         self.pages['home'][1].init()
 
@@ -48,11 +51,18 @@ class Window():
                 self.play = False
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.pages['home'][1].button.button.rendered.collidepoint(pygame.mouse.get_pos()):
+                    #
+                    self.change_page('menu')
+                elif self.pages['menu'][1].menu.button[0].rendered.collidepoint(pygame.mouse.get_pos()):
+                    self.pages['game'][1].set_stage("a")
+                    self.pages['game'][1].init()
+                    self.change_page('game')
+                elif self.pages['menu'][1].menu.button[1].rendered.collidepoint(pygame.mouse.get_pos()):
+                    self.pages['game'][1].set_stage("b")
+                    self.pages['game'][1].init()
                     self.change_page('game')
                 elif self.pages['game'][1].back.image.rendered.get_rect(center=self.pages['game'][1].back.image.get_center()).collidepoint(pygame.mouse.get_pos()):
-                    self.change_page('home')
-
-
+                    self.change_page('menu')
 
     def exit(self):
         pygame.quit()

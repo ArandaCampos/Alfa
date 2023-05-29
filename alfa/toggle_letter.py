@@ -8,7 +8,7 @@
 #           |
 #           +--> key
 
-import pygame
+import pygame, pandas as pd, numpy as np
 #from components import Text
 
 WIDTH = 800
@@ -21,7 +21,7 @@ class Toggle_letter():
         self.screen = screen
         # Parâmetros do Jogo
         self.letters = word.upper().split("*")
-        self.options = options
+        self.options = list(options)
         self.values  = [0 for i, item in enumerate(self.letters) if item == '']
         self.fields  = [i for i, item in enumerate(self.letters) if item == '']
         self.key     = 0

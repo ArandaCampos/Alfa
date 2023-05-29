@@ -156,6 +156,31 @@ class Button_play_game():
         self.label.draw()
         self.image.draw()
 
+class Menu():
+    def __init__(self, screen):
+
+        self.screen = screen
+        # Botões
+        self.button = []
+        # Etiquetas
+        self.label = []
+
+    def init(self):
+        for j in range(2):
+            for i in range(4):
+                self.button.append(Box(self.screen, (80, 80), (180 + 120 * i, 300 + 120 * j), GREEN_LIGHT, 8))
+                self.button[-1].init()
+                self.label.append(Text(self.screen, str(i + 4 * j + 1), 'Noto Mono', 20, BLUE))
+                self.label[-1].init()
+                self.label[-1].set_margins(
+                    (self.button[-1].margins[0] + (80 - self.label[-1].size[0]) / 2 , self.button[-1].margins[1] + (80 - self.label[-1].size[1]) / 2)
+                )
+
+    def draw(self):
+        for i in range(8):
+            self.button[i].draw()
+            self.label[i].draw()
+
 """
 class Rank():
     def __init__(self,screen):

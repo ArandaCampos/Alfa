@@ -9,7 +9,8 @@
 #       - Página de ranqueamento
 #--------------------------------------
 
-import pygame, os, random, csv
+import pygame, os
+import pandas as pd
 from read_word import read_word
 from toggle_letter import Toggle_letter
 from components import Button_cancel, Button_send, Score, Sound, Figure, Back_home
@@ -21,8 +22,6 @@ HEIGHT, WIDTH = 648, 800
 # Carregar diretório "Images"
 ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 AUD_PATH = os.path.join(ABS_PATH, 'Audio')
-# Dados leidos do .csv
-DATA = []
 
 # carregar dados do jogo
 def loading_data(file_data):
@@ -33,9 +32,7 @@ def loading_data(file_data):
 
 class Game():
     pygame.init()
-    def __init__(self, screen,
-                 option: (str),
-                ):
+    def __init__(self, screen):
         # Parâmetros de aparência
         self.bg_color = BG_COLOR
         self.title = 'ALFA - JOGO'
@@ -52,35 +49,51 @@ class Game():
         # Parâmetros do jogo
         self.screen = screen
         # Gabarito da rodada
-        #self.stage = 0
+        self.df = None
+        self.stage = None
         self.round = 0
-        self.option = option
+        self.option = None
 
     def init(self):
-        self.back = Back_home(self.screen)
-        self.back.init()
-        loading_data('Data/data_a.csv')
-        self.shuffle_data()
+        self.load_data()
         self.load_word()
         self.load_sound()
         self.load_score()
         self.load_btn_cancel()
         self.load_btn_send()
+        self.back = Back_home(self.screen)
+        self.back.init()
         pygame.display.set_caption(self.title)
 
-    def shuffle_data(self):
-        random.shuffle(DATA)
+    def set_stage(self, stage: str):
+        self.stage = stage
+
+    def load_data(self):
+        self.df = pd.DataFrame(pd.read_csv(f'Data/{self.stage}.csv', sep=" "))
+        self.option = self.df["answer"].unique()
+        self.df = self.df.sample(frac=1).reset_index(drop=True)
 
     def next_round(self):
-        self.round = self.round + 1 if self.round < len(DATA) - 1 else 0
+        self.round = self.round + 1 if self.round < len(self.df) - 1 else 0
+        #if self.round == len(self.df) - 1:
+        if self.round == 2:
+            rank = pd.DataFrame(pd.read_csv(f"Data/rank_{self.stage}.csv", sep=" "))
+            print(rank)
+            score = pd.DataFrame({
+                "user": ["Renan"],
+                "score": [self.score_board.text.text]
+            })
+            rank = pd.concat([rank, score], ignore_index=True)
+            rank = rank.sort_values(by='score', ascending=False)
+            print(rank)
+            rank[0:3].to_csv(f"Data/rank_{self.stage}.csv", sep=" ", index=False)
         self.load_word()
         self.load_sound()
 
     def load_word(self):
-        file, word, answer = DATA[self.round]
-        self.word = Toggle_letter(self.screen, word, self.option, answer)
+        self.word = Toggle_letter(self.screen, self.df["word"][self.round], self.option, self.df["answer"][self.round])
         self.word.init()
-        self.figure = Figure(self.screen, file)
+        self.figure = Figure(self.screen, self.df["file"][self.round])
         self.figure.init()
 
     def load_sound(self):
@@ -121,6 +134,7 @@ class Game():
                 self.word.toggle_key(increment=True)
             elif event.key == pygame.K_LEFT:
                 self.word.toggle_key(decrement=True)
+
             elif event.key == pygame.K_RETURN:
                 if self.word.response():
                     self.sound_win.play()

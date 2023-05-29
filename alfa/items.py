@@ -86,6 +86,7 @@ class Text():
         self.size = (w, h)
 
     def draw(self):
+        self.rendered = self.font.render('{}'.format(self.text), True, self.color)
         self.screen.blit(self.rendered, self.margins)
 
 class Box():
