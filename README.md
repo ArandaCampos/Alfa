@@ -8,12 +8,12 @@
 
 ## Como jogar
 
-&emsp;O jogador dispõe de uma imagem que ilustra a palavra a ser preenchida e um áudio, que lê o que estiver escrito no momento. Para alterar a síbala em destaque, o jogador poderá clicar as setas (`↑`, `↓`) ou a própria letra desejada.
+&emsp;O jogador dispõe de uma imagem que ilustra a palavra a ser preenchida e um áudio, que lê o que estiver escrito no momento. Para alterar a síbala em destaque, o jogador poderá clicar as setas (`↑`, `↓`) ou a própria letra desejada (`A`-`Z`).
 
-![image](https://github.com/ArandaCampos/PhysicPy/assets/87876734/56eb51bc-7b89-48b2-a476-d5d35273a1de)
+![image](https://github.com/ArandaCampos/Alfa/assets/87876734/ce1571f5-2adc-471c-87f6-f7126be1b82a)
 
 ## Tecnologias Empregadas
 
 * Python3
 * Pygame
-* gTTs
+* Pandas
