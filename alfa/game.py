@@ -1,24 +1,18 @@
 # ------------------------------------
 #   Author: Renan Campos
 #   Github: github.com/ArandaCampos
-#
-#   ALFA
-#
-#   - Falta:
-#       - Página inicial
-#       - Página de ranqueamento
-#--------------------------------------
+# ------------------------------------
 
 import pygame, os
 import pandas as pd
 from read_word import read_word
 from toggle_letter import Toggle_letter
-from components import Button_cancel, Button_send, Score, Sound, Figure, Back_home
+from components import Button_cancel, Button_send, Score, Sound, Figure, Back_home, Rank
 
 # Paleta de cores
 BG_COLOR = (222, 239, 231, .94)
 # Altura e largura da tela
-HEIGHT, WIDTH = 648, 800
+HEIGHT, WIDTH = 648, 1000
 # Carregar diretório "Images"
 ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 AUD_PATH = os.path.join(ABS_PATH, 'Audio')
@@ -46,11 +40,13 @@ class Game():
         self.figure = None
         self.sound_win = pygame.mixer.Sound(os.path.join(AUD_PATH, 'win.wav'))
         self.sound_fail = pygame.mixer.Sound(os.path.join(AUD_PATH, 'failed.wav'))
+        self.rank = None
         # Parâmetros do jogo
         self.screen = screen
         # Gabarito da rodada
         self.df = None
         self.stage = None
+        self.play = 1
         self.round = 0
         self.option = None
 
@@ -61,6 +57,7 @@ class Game():
         self.load_score()
         self.load_btn_cancel()
         self.load_btn_send()
+        self.play = 1
         self.back = Back_home(self.screen)
         self.back.init()
         pygame.display.set_caption(self.title)
@@ -75,18 +72,14 @@ class Game():
 
     def next_round(self):
         self.round = self.round + 1 if self.round < len(self.df) - 1 else 0
-        #if self.round == len(self.df) - 1:
-        if self.round == 2:
-            rank = pd.DataFrame(pd.read_csv(f"Data/rank_{self.stage}.csv", sep=" "))
-            print(rank)
-            score = pd.DataFrame({
+        if self.round == len(self.df) - 1:
+            game = pd.DataFrame({
                 "user": ["Renan"],
                 "score": [self.score_board.text.text]
             })
-            rank = pd.concat([rank, score], ignore_index=True)
-            rank = rank.sort_values(by='score', ascending=False)
-            print(rank)
-            rank[0:3].to_csv(f"Data/rank_{self.stage}.csv", sep=" ", index=False)
+            self.play = 0
+            self.rank = Rank(self.screen, self.score_board.text.text, self.stage)
+            self.rank.init()
         self.load_word()
         self.load_sound()
 
@@ -114,13 +107,16 @@ class Game():
 
     def refresh_screen(self):
         self.screen.fill(self.bg_color)
+        if self.play:
+            self.button_cancel.draw() if self.button_cancel else None
+            self.button_send.draw() if self.button_send else None
+            self.word.draw() if self.word else None
+            self.score_board.draw() if self.score_board else None
+            self.figure.draw() if self.figure else None
+            self.sound.draw() if self.sound else None
+        else:
+            self.rank.draw()
         self.back.draw() if self.back else None
-        self.button_cancel.draw() if self.button_cancel else None
-        self.button_send.draw() if self.button_send else None
-        self.word.draw() if self.word else None
-        self.score_board.draw() if self.score_board else None
-        self.figure.draw() if self.figure else None
-        self.sound.draw() if self.sound else None
         pygame.display.set_caption(self.title)
         pygame.display.flip()
 

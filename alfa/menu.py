@@ -7,17 +7,14 @@ BG_COLOR, BLUE = (222, 239, 231, .94), (1, 32, 48, 1.)
 ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 1.), (154, 235, 163, 1.)
 WHITE = (240, 240, 242, .95)
 
-HEIGHT, WIDTH = 648, 800
+HEIGHT, WIDTH = 648, 1000
 
 class Menu_page():
     def __init__(self, screen):
 
         self.screen = screen
         self.caption = 'ALFA - MENU'
-        # Título
         self.title = None
-        # Botão
-        self.button = None
         self.menu = None
 
     def init(self):
@@ -25,13 +22,10 @@ class Menu_page():
         self.menu.init()
         self.title = Text(self.screen, 'ALFA', 'Noto Mono', 90, BLUE)
         self.title.init()
-        self.title.set_margins(((WIDTH - self.title.size[0])/ 2, 150))
-        #self.button = Button_play_game(self.screen)
-        #self.button.init()
+        self.title.set_margins(((WIDTH - self.title.size[0])/ 2, 50))
 
     def refresh_screen(self):
         self.screen.fill(BG_COLOR)
-        #self.button.draw() if self.button else None
         self.title.draw() if self.title else None
         self.menu.draw() if self.menu else None
         pygame.display.set_caption(self.caption)
@@ -51,4 +45,3 @@ class Menu_page():
     def draw(self):
         self.menu.draw()
         self.title.draw()
-        #self.button.draw()

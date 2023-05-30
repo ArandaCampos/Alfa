@@ -1,11 +1,10 @@
-import pygame
-import os
+import pygame, pandas as pd, os
 from read_word import read_word
 from items import Box, Text, Image, Text, Image
 
 ## criar o def event() em Sound e Buttons
 
-HEIGHT, WIDTH = 648, 800
+HEIGHT, WIDTH = 648, 1000
 WHITE, BLUE = (240, 240, 242, .95), (1, 32, 48, 1.)
 ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 1.), (154, 235, 163, 1.)
 
@@ -166,50 +165,57 @@ class Menu():
         self.label = []
 
     def init(self):
-        for j in range(2):
-            for i in range(4):
-                self.button.append(Box(self.screen, (80, 80), (180 + 120 * i, 300 + 120 * j), GREEN_LIGHT, 8))
-                self.button[-1].init()
-                self.label.append(Text(self.screen, str(i + 4 * j + 1), 'Noto Mono', 20, BLUE))
-                self.label[-1].init()
-                self.label[-1].set_margins(
-                    (self.button[-1].margins[0] + (80 - self.label[-1].size[0]) / 2 , self.button[-1].margins[1] + (80 - self.label[-1].size[1]) / 2)
-                )
+        line, column = 5, 8
+        space_btn = 50 * column + 50 * (column - 1)
+        for j in range(line):
+            for i in range(column):
+                if i + column * j <= 25:
+                    self.button.append(Box(self.screen, (50, 50), ((WIDTH - space_btn)/2 + 100 * i, 200 + 100 * j), GREEN_LIGHT, 8))
+                    self.button[-1].init()
+                    self.label.append(Text(self.screen, chr(65+ i + column * j), 'Noto Mono', 20, BLUE))
+                    self.label[-1].init()
+                    self.label[-1].set_margins(
+                        (self.button[-1].margins[0] + (50 - self.label[-1].size[0]) / 2 , self.button[-1].margins[1] + (50 - self.label[-1].size[1]) / 2)
+                    )
 
     def draw(self):
-        for i in range(8):
+        for i in range(26):
             self.button[i].draw()
             self.label[i].draw()
 
-"""
 class Rank():
-    def __init__(self,screen):
+    def __init__(self,screen, score: int, stage: str):
 
         self.screen = screen
         # Imagem
-        self.image = Image(screen, 'medal.png', (250, 250))
+        self.image = Image(screen, 'medal.png', (200, 200))
         # Texto
-        self.text_1 = Text(screen, 'jogador    pontos', 'Noto Mono', 20, BLUE)
-        self.text_2 = Text(screen, 'Jogador 1    33', 'Noto Mono', 35, BLUE)
-        self.text_3 = Text(screen, 'Jogador 2    30', 'Noto Mono', 35, ORANGE_LIGHT)
-        self.text_4 = Text(screen, 'Jogador 3     5', 'Noto Mono', 35, BLUE)
+        self.stage = stage
+        self.score = score
+        self.legend = Text(screen, 'Família {}'.format(stage), 'Noto Mono', 20, BLUE)
+        self.text = Text(screen, '{} pontos'.format(score), 'Noto Mono', 35, BLUE)
 
     def init(self):
         self.image.init()
-        self.image.set_margins(((WIDTH - self.image.size[0]) / 2, 50))
-        self.text_1.init()
-        self.text_2.init()
-        self.text_3.init()
-        self.text_4.init()
-        self.text_1.set_margins(((WIDTH - self.text_1.size[0]) / 2, self.image.size[1] + self.image.margins[1] + 50))
-        self.text_2.set_margins(((WIDTH - self.text_2.size[0]) / 2, self.text_1.margins[1] + 50))
-        self.text_3.set_margins(((WIDTH - self.text_3.size[0]) / 2, self.text_2.margins [1] + 50))
-        self.text_4.set_margins(((WIDTH - self.text_4.size[0]) / 2, self.text_3.margins [1] + 50))
+        self.legend.init()
+        self.text.init()
+        self.image.set_margins(((WIDTH - self.image.size[0])/2, (HEIGHT - self.image.size[1] - 100 - self.legend.size[1] - self.text.size[1])/2 ))
+        self.legend.set_margins(((WIDTH - self.text.size[0]) / 2, self.image.margins[1] + self.image.size[1] + 50))
+        self.text.set_margins(((WIDTH - self.text.size[0]) / 2, self.legend.margins[1] + self.legend.size[1] + 50))
+        self.save()
+
+    def save(self):
+        rank = pd.DataFrame(pd.read_csv(f"Data/rank_{self.stage}.csv", sep=" "))
+        last = pd.DataFrame({
+            "user": ["Mônica"],
+            "score": [self.score]
+        })
+        rank = pd.concat([rank, last], ignore_index=True)
+        rank = rank.sort_values(by='score', ascending=False)
+        rank.to_csv(f"Data/rank_{self.stage}.csv", sep=" ", index=False)
 
     def draw(self):
         self.image.draw()
-        self.text_1.draw()
-        self.text_2.draw()
-        self.text_3.draw()
-        self.text_4.draw()
-"""
+        #self.legend.draw()
+        #for text in self.texts:
+        self.text.draw()

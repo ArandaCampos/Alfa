@@ -5,7 +5,7 @@ from items import Text
 # Paleta de cor
 BG_COLOR, BLUE = (222, 239, 231, .94), (1, 32, 48, 1.)
 
-HEIGHT, WIDTH = 648, 800
+HEIGHT, WIDTH = 648, 1000
 
 class Home():
     def __init__(self, screen):
