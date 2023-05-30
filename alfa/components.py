@@ -165,21 +165,23 @@ class Menu():
         self.label = []
 
     def init(self):
-        line, column = 5, 8
-        space_btn = 50 * column + 50 * (column - 1)
+        line, column = 4, 6
+        space_btn = 70 * column + 30 * (column - 1)
+        # [7, 10, 22, 24] =~ [H, K, Y, W]
+        letters = [i for i in range(25) if i not in [7, 10, 22, 24]]
         for j in range(line):
             for i in range(column):
-                if i + column * j <= 25:
-                    self.button.append(Box(self.screen, (50, 50), ((WIDTH - space_btn)/2 + 100 * i, 200 + 100 * j), GREEN_LIGHT, 8))
+                if i + column * j in range(len(letters)):
+                    self.button.append(Box(self.screen, (70, 70), ((WIDTH - space_btn)/2 + 100 * i, 200 + 100 * j), GREEN_LIGHT, 8))
                     self.button[-1].init()
-                    self.label.append(Text(self.screen, chr(65+ i + column * j), 'Noto Mono', 20, BLUE))
+                    self.label.append(Text(self.screen, chr(65 + letters[i + column * j]), 'Noto Mono', 20, BLUE))
                     self.label[-1].init()
                     self.label[-1].set_margins(
-                        (self.button[-1].margins[0] + (50 - self.label[-1].size[0]) / 2 , self.button[-1].margins[1] + (50 - self.label[-1].size[1]) / 2)
+                        (self.button[-1].margins[0] + (70 - self.label[-1].size[0]) / 2 , self.button[-1].margins[1] + (70 - self.label[-1].size[1]) / 2)
                     )
 
     def draw(self):
-        for i in range(26):
+        for i in range(len(self.button)):
             self.button[i].draw()
             self.label[i].draw()
 
