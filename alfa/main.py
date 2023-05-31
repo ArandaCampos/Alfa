@@ -26,7 +26,6 @@ class Window():
         pygame.display.set_caption(self.caption)
         self.pages['game'] = [False, Game(self.screen)]
         self.pages['menu'] = [False, Menu_page(self.screen)]
-        self.pages['menu'][1].init()
         self.pages['home'] = [True, Home(self.screen)]
         self.pages['home'][1].init()
 
@@ -35,6 +34,7 @@ class Window():
         for page in pages:
             self.pages[page][0] = False
         self.pages[page_on][0] = True
+        self.pages[page_on][1].init()
 
     def refresh_screen(self):
         pages = [page for page in self.pages if self.pages.get(page)[0] == True]
@@ -49,18 +49,25 @@ class Window():
                 self.pages[page][1].get_event(event)
             if event.type == pygame.QUIT:
                 self.play = False
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if self.pages['home'][0]:
+            if self.pages['home'][0]:
+                if event.type == pygame.MOUSEBUTTONUP:
                     if self.pages['home'][1].button.button.rendered.collidepoint(pygame.mouse.get_pos()):
-                        #
                         self.change_page('menu')
-                if self.pages['menu'][0]:
-                    for i, button in enumerate(self.pages['menu'][1].menu.button):
+            elif self.pages['menu'][0]:
+                letters = [i + 65 for i in range(25) if i not in [7, 10, 22, 24]]
+                if event.type == pygame.KEYDOWN:
+                    if ord(event.unicode.upper()) in letters:
+                        self.pages['game'][1].set_stage(event.unicode.lower())
+                        self.pages['game'][1].init()
+                        self.change_page('game')
+                if event.type == pygame.MOUSEBUTTONUP:
+                    for i, button in zip(letters, self.pages['menu'][1].menu.button):
                         if button.rendered.collidepoint(pygame.mouse.get_pos()):
-                            self.pages['game'][1].set_stage(chr(65 + i).lower())
+                            self.pages['game'][1].set_stage(chr(i).lower())
                             self.pages['game'][1].init()
                             self.change_page('game')
-                if self.pages['game'][0]:
+            elif self.pages['game'][0]:
+                if event.type == pygame.MOUSEBUTTONUP:
                     if self.pages['game'][1].back.image.rendered.get_rect(center=self.pages['game'][1].back.image.get_center()).collidepoint(pygame.mouse.get_pos()):
                         self.change_page('menu')
 

@@ -17,13 +17,6 @@ HEIGHT, WIDTH = 648, 1000
 ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 AUD_PATH = os.path.join(ABS_PATH, 'Audio')
 
-# carregar dados do jogo
-def loading_data(file_data):
-    with open(file_data, newline='') as csvfile:
-        text = csv.reader(csvfile, delimiter=' ')
-        for words in text:
-            DATA.append(words)
-
 class Game():
     pygame.init()
     def __init__(self, screen):
@@ -51,6 +44,7 @@ class Game():
         self.option = None
 
     def init(self):
+        self.round = 0
         self.load_data()
         self.load_word()
         self.load_sound()
@@ -71,8 +65,8 @@ class Game():
         self.df = self.df.sample(frac=1).reset_index(drop=True)
 
     def next_round(self):
-        self.round = self.round + 1 if self.round < len(self.df) - 1 else 0
-        if self.round == len(self.df) - 1:
+        # Fim de jogo (10 rodas ou até o fim das imagens)
+        if self.round == 9 or self.round == len(self.df) - 1:
             game = pd.DataFrame({
                 "user": ["Renan"],
                 "score": [self.score_board.text.text]
@@ -80,6 +74,8 @@ class Game():
             self.play = 0
             self.rank = Rank(self.screen, self.score_board.text.text, self.stage)
             self.rank.init()
+        # Próxima rodada
+        self.round = self.round + 1 if self.round < len(self.df) - 1 else 0
         self.load_word()
         self.load_sound()
 

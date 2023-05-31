@@ -33,6 +33,10 @@ class Menu_page():
 
     def get_event(self, event):
         pos = pygame.mouse.get_pos()
+        if event.type == pygame.KEYDOWN:
+            letters = [i + 65 for i in range(25) if i not in [7, 10, 22, 24]]
+            if event.unicode.upper() in letters:
+                self.word.toggle_value(letter=event.unicode)
 
         for button, label in zip(self.menu.button, self.menu.label):
             if pos[0] > button.margins[0] and pos[0] < button.margins[0] + button.size[0] and pos[1] > button.margins[1] and pos[1] < button.margins[1] + button.size[1]:
