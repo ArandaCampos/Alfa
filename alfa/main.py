@@ -1,7 +1,11 @@
-import pygame, os
-from game import Game
-from home import Home
-from menu import Menu_page
+import os
+from completion import Game, Home, Menu_page
+
+try:
+    import pygame
+except ImportError:
+    print('Erro ao importar o Pygame. Verifique se o ambiente virtual está habilitado ou o pacote instalado')
+    raise SystemExit
 
 class Window():
     def __init__(self):
@@ -47,11 +51,14 @@ class Window():
         for event in pygame.event.get():
             for page in pages:
                 self.pages[page][1].get_event(event)
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.play = False
             if self.pages['home'][0]:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if self.pages['home'][1].button.button.rendered.collidepoint(pygame.mouse.get_pos()):
+                        self.change_page('menu')
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
                         self.change_page('menu')
             elif self.pages['menu'][0]:
                 letters = [i + 65 for i in range(25) if i not in [7, 10, 22, 24]]
@@ -67,8 +74,9 @@ class Window():
                             self.pages['game'][1].init()
                             self.change_page('game')
             elif self.pages['game'][0]:
+                rect_btn_back = self.pages['game'][1].back.image.rendered.get_rect(center=self.pages['game'][1].back.image.get_center())
                 if event.type == pygame.MOUSEBUTTONUP:
-                    if self.pages['game'][1].back.image.rendered.get_rect(center=self.pages['game'][1].back.image.get_center()).collidepoint(pygame.mouse.get_pos()):
+                    if rect_btn_back.collidepoint(pygame.mouse.get_pos()):
                         self.change_page('menu')
 
     def exit(self):
