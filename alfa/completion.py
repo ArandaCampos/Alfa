@@ -4,7 +4,7 @@
 # --------------------------------------------
 
 import os
-from items import Text, Button_cancel, Button_send, Button_play_game, Score, Sound, Figure, Back_home, Rank, Menu
+from items import Text, Score, Sound, Rank, Menu, Button, Image
 
 try:
     import pygame
@@ -175,37 +175,6 @@ class Toggle_letter():
             for i in range(len(self.margins)):
                 self.screen.blit(self.rendered_letters[i],(self.margins[i][0], self.margins[i][1]))
 
-class Home():
-    def __init__(self, screen):
-
-        self.screen = screen
-        self.caption = 'ALFA - MENU'
-        # Título
-        self.title = None
-        # Botão
-        self.button = None
-
-    def init(self):
-        self.title = Text(self.screen, 'ALFA', 'Noto Mono', 90, BLUE)
-        self.title.init()
-        self.title.set_margins(((WIDTH - self.title.size[0])/ 2, (HEIGHT - self.title.size[1])/ 2))
-        self.button = Button_play_game(self.screen)
-        self.button.init()
-
-    def refresh_screen(self):
-        self.screen.fill(BG_COLOR)
-        self.button.draw() if self.button else None
-        self.title.draw() if self.title else None
-        pygame.display.set_caption(self.caption)
-        pygame.display.flip()
-
-    def get_event(self, event):
-        pass
-
-    def draw(self):
-        self.title.draw()
-        self.button.draw()
-
 class Game():
     pygame.init()
     def __init__(self, screen):
@@ -241,7 +210,7 @@ class Game():
         self.load_btn_cancel()
         self.load_btn_send()
         self.play = 1
-        self.back = Back_home(self.screen)
+        self.back = Image(self.screen, 'back.png', (30, 30), (25,25))
         self.back.init()
         pygame.display.set_caption(self.title)
 
@@ -272,7 +241,7 @@ class Game():
         self.word = Toggle_letter(self.screen, self.df["word"][self.round], self.option, self.df["answer"][self.round])
         #self.word = Hangman(self.screen, self.df["word"][self.round])
         self.word.init()
-        self.figure = Figure(self.screen, self.df["file"][self.round])
+        self.figure = Image(self.screen, self.df["file"][self.round], (250, 250), ((WIDTH - 250) / 2, 50))
         self.figure.init()
 
     def load_sound(self):
@@ -284,11 +253,17 @@ class Game():
         self.score_board.init()
 
     def load_btn_cancel(self):
-        self.button_cancel = Button_cancel(self.screen)
+        self.button_cancel = Button(self.screen, label="CANCELAR", margin_box=(120, HEIGHT - 110), src='cancel.png')
         self.button_cancel.init()
 
     def load_btn_send(self):
-        self.button_send = Button_send(self.screen)
+        self.button_send = Button(self.screen,
+                                  label="ENVIAR",
+                                  color_label=BLUE,
+                                  margin_box=(WIDTH - 120 - 220, HEIGHT - 110),
+                                  color_box = GREEN_LIGHT,
+                                  src='send.png'
+                                  )
         self.button_send.init()
 
     def refresh_screen(self):
@@ -329,8 +304,8 @@ class Game():
             # Comandos de mouse
         elif event.type == pygame.MOUSEBUTTONUP:
             sound_rect = self.sound.image.rendered.get_rect(center=self.sound.image.get_center())
-            send_rect = self.button_send.button.rendered
-            cancel_rect = self.button_cancel.button.rendered
+            send_rect = self.button_send.box.rendered
+            cancel_rect = self.button_cancel.box.rendered
             if sound_rect.collidepoint(pygame.mouse.get_pos()):
                 read_word(self.word.get_word())
             elif send_rect.collidepoint(pygame.mouse.get_pos()):

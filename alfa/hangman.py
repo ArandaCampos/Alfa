@@ -8,7 +8,11 @@
 #
 # --------------------------------------------
 
-import pygame, pandas as pd, numpy as np
+try:
+    import pygame
+except ImportError:
+    print('Erro ao importar a biblioteca Pygame.')
+    raise SystemExit
 #from components import Text
 
 WIDTH = 1000

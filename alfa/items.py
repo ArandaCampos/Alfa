@@ -11,14 +11,14 @@ ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 IMG_PATH = os.path.join(ABS_PATH, 'Images')
 
 class Image():
-    def __init__(self, screen, file, size):
+    def __init__(self, screen, file: str, size: (int, int), margins: (int, int) = None):
 
         self.screen = screen
         self.file = file
         # Estilização
         self.size = size
         # Position
-        self.margins = None
+        self.margins = margins
         # Render
         self.rendered = None
 
@@ -96,7 +96,7 @@ class Text():
         self.screen.blit(self.rendered, self.margins)
 
 class Box():
-    def __init__(self, screen, size, margins, color, border_radius):
+    def __init__(self, screen, size, margins = (0, 0), color = ORANGE_LIGHT, border_radius = 8):
 
         self.screen = screen
         # Estilização
@@ -117,35 +117,6 @@ class Box():
     def draw(self):
         pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
 
-class Figure():
-    def __init__(self, screen, file):
-
-        self.screen = screen
-        #Imagem
-        self.image = Image(screen, file, (250,250))
-
-    def init(self):
-        self.image.init()
-        self.image.set_margins(((WIDTH - 250) / 2, 50))
-
-    def draw(self):
-        self.image.draw()
-
-class Back_home():
-    def __init__(self, screen):
-
-        self.screen = screen
-        # Imagem
-        self.image = Image(screen, 'back.png', (32, 32))
-
-    def init(self):
-        self.image.init()
-        self.image.set_margins((25, 25))
-
-    def draw(self):
-        self.image.draw()
-
-
 class Sound():
     def __init__(self, screen, margins: [int, int], padding: int = 60):
 
@@ -163,51 +134,74 @@ class Sound():
     def draw(self):
         self.image.draw()
 
-class Button_cancel():
-    def __init__(self, screen):
-
+class Button():
+    def __init__(self,
+                 screen,
+                 label: str = None,
+                 color_label: (int, int, int) = WHITE,
+                 size_label: int = 20,
+                 size_box: (int, int) = (220, 75),
+                 margin_box: (int, int) = (0,0),
+                 color_box: (int, int, int) = ORANGE_LIGHT,
+                 border_radius: int = 8,
+                 src: str = None,
+                 size_img: (int, int) =  (20, 20)
+                ):
         self.screen = screen
-        # Botão
-        self.button = Box(screen, (220, 75), (120, HEIGHT - 110), ORANGE_LIGHT, 8)
-        # Etiqueta
-        self.label = Text(screen, 'CANCELAR', 'Noto Mono', 20, WHITE)
-        # Ícone
-        self.image = Image(screen, 'cancel.png', (20,20))
+        self.box = None
+        self.size_box = size_box
+        self.margin_box = margin_box
+        self.color_box = color_box
+        self.border_radius = border_radius
+        self.label = None
+        self.txt_label = label
+        self.color_label = color_label
+        self.size_label = size_label
+        self.src = src
+        self.image = None
 
     def init(self):
-        self.button.init()
-        self.label.init()
-        self.label.set_margins((self.button.margins[0] + 35 , HEIGHT - 75 - self.label.size[1] / 2))
-        self.image.init()
-        self.image.set_margins((120 + self.button.size[0] - self.image.size[0] - 35, HEIGHT - 75 - self.image.size[1]/2))
+        self.box = Box(self.screen, self.size_box, self.margin_box, color=self.color_box, border_radius=self.border_radius)
+        self.label = Text(self.screen, self.txt_label, 'Noto Mono', self.size_label, self.color_label) if self.txt_label else None
+        self.image = Image(self.screen, self.src, (20,20)) if self.src else None
+        self.box.init()
+        self.label.init() if self.label else None
+        self.image.init() if self.image else None
+        if self.image and self.label:
+            # Centraliza os dois com uma margins de 35
+            self.label.set_margins((
+                # x
+                self.box.margins[0] + 35 ,
+                # y
+                self.box.margins[1] + (self.box.size[1] - self.label.size[1]) / 2
+            ))
+            self.image.set_margins((
+                # x
+                self.box.margins[0] + self.box.size[0] - self.image.size[0] - 35,
+                # y
+                self.box.margins[1] + (self.box.size[1] - self.image.size[1])/2
+            ))
+        elif self.image:
+            # Centraliza a imagem
+            self.image.set_margins((
+                # x
+                self.box.margins[0] + (self.box.size[0] - self.image.size[0]) / 2,
+                # y
+                self.box.margins[1] + (self.box.size[1] - self.image.size[1]) / 2
+            ))
+        elif self.label:
+            # Centraliza o label
+            self.label.set_margins((
+                # x
+                self.box.margins[0] + (self.box.size[0] - self.image.size[0]) / 2,
+                # y
+                self.box.margins[1] + (self.box.size[1] - self.label.size[1]) / 2
+            ))
 
     def draw(self):
-        self.button.draw()
-        self.label.draw()
-        self.image.draw()
-
-class Button_send():
-    def __init__(self, screen):
-
-        self.screen = screen
-        # Botão
-        self.button = Box(screen, (220, 75), (WIDTH - 120 - 220, HEIGHT - 110), GREEN_LIGHT, 8)
-        # Etiqueta
-        self.label = Text(screen, 'ENVIAR', 'Noto Mono', 20, BLUE)
-        # Ícone
-        self.image = Image(screen, 'send.png', (20,20))
-
-    def init(self):
-        self.button.init()
-        self.label.init()
-        self.label.set_margins((self.button.margins[0] + 35 , HEIGHT - 75 - self.label.size[1] / 2))
-        self.image.init()
-        self.image.set_margins((self.button.margins[0] + self.button.size[0] - self.image.size[0] - 35, HEIGHT - 75 - self.image.size[1]/2))
-
-    def draw(self):
-        self.button.draw()
-        self.label.draw()
-        self.image.draw()
+        self.box.draw()
+        self.label.draw() if self.label else None
+        self.image.draw() if self.image else None
 
 class Score():
     def __init__(self, screen):
@@ -242,9 +236,32 @@ class Button_play_game():
 
         self.screen = screen
         # Botão
+        self.button = Box(screen, (220, 75), ((WIDTH - 220) / 2, HEIGHT - 75 - 150), ORANGE_LIGHT, 8)
+        # Etiqueta
+        self.label = Text(screen, 'COMPLETAR', 'Noto Mono', 20, WHITE)
+        # Ícone
+        self.image = Image(screen, 'play.png', (20,20))
+
+    def init(self):
+        self.button.init()
+        self.label.init()
+        self.label.set_margins((self.button.margins[0] + 35 , self.button.margins[1] + (75 - self.label.size[1]) / 2))
+        self.image.init()
+        self.image.set_margins((self.button.margins[0] + self.button.size[0] - self.image.size[0] - 35, self.button.margins[1] + (75 - self.image.size[1])/2))
+
+    def draw(self):
+        self.button.draw()
+        self.label.draw()
+        self.image.draw()
+
+class Button_play_hangman():
+    def __init__(self, screen):
+
+        self.screen = screen
+        # Botão
         self.button = Box(screen, (220, 75), ((WIDTH - 220) / 2, HEIGHT - 75 - 50), ORANGE_LIGHT, 8)
         # Etiqueta
-        self.label = Text(screen, 'JOGAR', 'Noto Mono', 20, WHITE)
+        self.label = Text(screen, 'FORCA', 'Noto Mono', 20, WHITE)
         # Ícone
         self.image = Image(screen, 'play.png', (20,20))
 
