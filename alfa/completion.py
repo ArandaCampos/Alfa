@@ -43,11 +43,11 @@ ORANGE_LIGHT, ORANGE, GREEN_LIGHT = (242, 68, 5, 1.), (250, 127, 8, .98), (154, 
 # Altura e largura da tela
 HEIGHT, WIDTH = 648, 1000
 
-# Carregar diretório "Images"
+# Carregar diretório "Audio"
 ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 AUD_PATH = os.path.join(ABS_PATH, 'Audio')
 
-def read_word(word: str):
+def to_read(word: str):
     """
         Carrega o texto digitado no campo '' e
         o salva em portugês-Brasil no 'audio.mp3'
@@ -55,13 +55,6 @@ def read_word(word: str):
 
     tts = gTTS(word, lang='pt', tld="com.br")
     tts.save("audio.mp3")
-    speech_word()
-
-def speech_word():
-    """
-        Toca o arquivo 'audio.mp3'
-    """
-
     playsound("audio.mp3")
 
 class Toggle_letter():
@@ -257,13 +250,14 @@ class Game():
         self.button_cancel.init()
 
     def load_btn_send(self):
-        self.button_send = Button(self.screen,
+        self.button_send = Button(
+                                  self.screen,
                                   label="ENVIAR",
                                   color_label=BLUE,
                                   margin_box=(WIDTH - 120 - 220, HEIGHT - 110),
                                   color_box = GREEN_LIGHT,
                                   src='send.png'
-                                  )
+                                )
         self.button_send.init()
 
     def refresh_screen(self):
@@ -307,7 +301,7 @@ class Game():
             send_rect = self.button_send.box.rendered
             cancel_rect = self.button_cancel.box.rendered
             if sound_rect.collidepoint(pygame.mouse.get_pos()):
-                read_word(self.word.get_word())
+                to_read(self.word.get_word())
             elif send_rect.collidepoint(pygame.mouse.get_pos()):
                 if self.word.response():
                     self.sound_win.play()
@@ -321,47 +315,6 @@ class Game():
 
     def exit(self):
         pygame.quit()
-
-class Menu_page():
-    def __init__(self, screen):
-
-        self.screen = screen
-        self.caption = 'ALFA - MENU'
-        self.title = None
-        self.menu = None
-
-    def init(self):
-        self.menu = Menu(self.screen)
-        self.menu.init()
-        self.title = Text(self.screen, 'ALFA', 'Noto Mono', 90, BLUE)
-        self.title.init()
-        self.title.set_margins(((WIDTH - self.title.size[0])/ 2, 50))
-
-    def refresh_screen(self):
-        self.screen.fill(BG_COLOR)
-        self.title.draw() if self.title else None
-        self.menu.draw() if self.menu else None
-        pygame.display.set_caption(self.caption)
-        pygame.display.flip()
-
-    def get_event(self, event):
-        pos = pygame.mouse.get_pos()
-        if event.type == pygame.KEYDOWN:
-            letters = [i + 65 for i in range(25) if i not in [7, 10, 22, 24]]
-            if event.unicode.upper() in letters:
-                self.word.toggle_value(letter=event.unicode)
-
-        for button, label in zip(self.menu.button, self.menu.label):
-            if pos[0] > button.margins[0] and pos[0] < button.margins[0] + button.size[0] and pos[1] > button.margins[1] and pos[1] < button.margins[1] + button.size[1]:
-                    button.color = ORANGE_LIGHT
-                    label.color = WHITE
-            else:
-                button.color = GREEN_LIGHT
-                label.color = BLUE
-
-    def draw(self):
-        self.menu.draw()
-        self.title.draw()
 
 class Menu_page():
     def __init__(self, screen):
