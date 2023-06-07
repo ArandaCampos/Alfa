@@ -1,7 +1,6 @@
 import os
 from completion import Game, Menu_page
-from items import Button_play_game, Button_play_hangman
-from items import Text
+from items import Button, Text
 
 try:
     import pygame
@@ -9,7 +8,7 @@ except ImportError:
     print('Erro ao importar o Pygame. Verifique se o ambiente virtual está habilitado ou o pacote instalado')
     raise SystemExit
 
-BG_COLOR, BLUE = (222, 239, 231, .94), (1, 32, 48, 1.)
+BG_COLOR, BLUE = (222, 239, 231, 240), (1, 32, 48, 255)
 HEIGHT, WIDTH = 648, 1000
 
 class Home():
@@ -25,11 +24,25 @@ class Home():
     def init(self):
         self.title = Text(self.screen, 'ALFA', 'Noto Mono', 90, BLUE)
         self.title.init()
+        self.title.blink = True
         self.title.set_margins(((WIDTH - self.title.size[0])/ 2, (HEIGHT - self.title.size[1])/ 2))
-        self.buttons.append(Button_play_game(self.screen))
-        self.buttons[-1].init()
-        self.buttons.append(Button_play_hangman(self.screen))
-        self.buttons[-1].init()
+        self.buttons.append(Button(
+                                  self.screen,
+                                  label="COMPLETAR",
+                                  margin_box=((WIDTH / 2 - 220) /2 , HEIGHT - 75 - 100),
+                                  src='play.png'
+                                )
+                            )
+        self.buttons.append(Button(
+                                  self.screen,
+                                  label="FORCA",
+                                  margin_box=(WIDTH /2 + (WIDTH / 2 - 220) /2 , HEIGHT - 75 - 100),
+                                  src='play.png'
+                                )
+                            )
+
+        for button in self.buttons:
+            button.init()
 
     def refresh_screen(self):
         self.screen.fill(BG_COLOR)
@@ -95,8 +108,12 @@ class Window():
                 self.play = False
             if self.pages['home'][0]:
                 if event.type == pygame.MOUSEBUTTONUP:
-                    if self.pages['home'][1].buttons[0].button.rendered.collidepoint(pygame.mouse.get_pos()):
+                    if self.pages['home'][1].buttons[0].box.rendered.collidepoint(pygame.mouse.get_pos()):
                         self.change_page('menu')
+                        self.pages['game'][1].game = 0
+                    elif self.pages['home'][1].buttons[1].box.rendered.collidepoint(pygame.mouse.get_pos()):
+                        self.change_page('menu')
+                        self.pages['game'][1].game = 1
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         self.change_page('menu')

@@ -1,10 +1,11 @@
 import pygame
 import os, pandas as pd
+from animation import blink
 
 # Paleta de cores
 HEIGHT, WIDTH = 648, 1000
-WHITE, BLUE = (240, 240, 242, .95), (1, 32, 48, 1.)
-ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 1.), (154, 235, 163, 1.)
+WHITE, BLUE = (240, 240, 242, 242), (1, 32, 48, 255)
+ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 255), (154, 235, 163, 255)
 
 # Carregar diretório "Images"
 ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -31,6 +32,9 @@ class Image():
     def set_size(self, size: str):
         self.size = size
 
+    def get_rect_center(self):
+        return self.rendered.get_rect(center=self.get_center())
+
     def get_center(self) -> [int, int]:
         return [self.margins[0] + self.size[0] /2, self.margins[1] + self.size[1] /2]
 
@@ -45,7 +49,7 @@ class Image():
         self.screen.blit(self.rendered, self.margins)
 
 class Text():
-    def __init__(self, screen, txt: str, family: str, size_font: int, color: (int, int, int), bold: bool = False):
+    def __init__(self, screen, txt: str, family: str, size_font: int, color: [int, int, int, float], bold: bool = False):
 
         self.screen = screen
         self.text = txt
@@ -53,13 +57,16 @@ class Text():
         self.family = family
         self.font_size = size_font
         self.size = 0
-        self.color = color
+        self.color = pygame.Color(color)
         self.font = None
         self.bold = bold
         # Position
         self.margins = 0
         # Render
         self.rendered = None
+        # Animação
+        self.blink = False
+        self.alpha = 255
 
     def init(self):
         self.font = pygame.font.SysFont(self.family, self.font_size, bold=self.bold)
@@ -67,12 +74,6 @@ class Text():
 
     def set_text(self, txt: str):
         self.text = txt
-
-    def set_font(self, family: str, size: int, bold):
-        self.font = pygame.font.SysFont(family, size, bold=bold)
-
-    def set_color(self, color: (int, int, int)):
-        self.color = color
 
     def get_center(self) -> [int, int]:
         _, _, w, h = self.rendered.get_rect()
@@ -93,6 +94,9 @@ class Text():
 
     def draw(self):
         self.rendered = self.font.render('{}'.format(self.text), True, self.color)
+        if self.blink:
+            self.alpha = blink(self.alpha)
+            self.rendered.set_alpha(self.alpha)
         self.screen.blit(self.rendered, self.margins)
 
 class Box():
@@ -116,23 +120,6 @@ class Box():
 
     def draw(self):
         pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
-
-class Sound():
-    def __init__(self, screen, margins: [int, int], padding: int = 60):
-
-        self.screen = screen
-
-        # Icone de áudio
-        self.image = Image(screen, 'sound.png', (31.4, 30))
-        self.margins = margins
-        self.padding = padding
-
-    def init(self):
-        self.image.init()
-        self.image.set_margins((self.margins[0] + self.padding, self.margins[1] - self.image.size[1] /2))
-
-    def draw(self):
-        self.image.draw()
 
 class Button():
     def __init__(self,
