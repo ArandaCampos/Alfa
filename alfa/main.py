@@ -1,6 +1,7 @@
 import os
 from completion import Game, Menu_page
-from items import Button, Text
+from items import Button, Text, Page
+from animations import Blink, Hover
 
 try:
     import pygame
@@ -9,56 +10,45 @@ except ImportError:
     raise SystemExit
 
 BG_COLOR, BLUE = (222, 239, 231, 240), (1, 32, 48, 255)
+ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 255), (154, 235, 163, 255)
 HEIGHT, WIDTH = 648, 1000
 
-class Home():
+class Home(Page):
     def __init__(self, screen):
 
-        self.screen = screen
-        self.caption = 'ALFA - MENU'
-        # Título
-        self.title = None
-        # Botão
-        self.buttons = []
+        super().__init__(screen, "PÁGINA INICIAL - ALFA", (0, 0, 0))
 
     def init(self):
-        self.title = Text(self.screen, 'ALFA', 'Noto Mono', 90, BLUE)
-        self.title.init()
-        self.title.blink = True
-        self.title.set_margins(((WIDTH - self.title.size[0])/ 2, (HEIGHT - self.title.size[1])/ 2))
-        self.buttons.append(Button(
-                                  self.screen,
-                                  label="COMPLETAR",
-                                  margin_box=((WIDTH / 2 - 220) /2 , HEIGHT - 75 - 100),
-                                  src='play.png'
-                                )
-                            )
-        self.buttons.append(Button(
-                                  self.screen,
-                                  label="FORCA",
-                                  margin_box=(WIDTH /2 + (WIDTH / 2 - 220) /2 , HEIGHT - 75 - 100),
-                                  src='play.png'
-                                )
-                            )
+        # Título principal
+        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, BLUE))
+        self.components[-1].init()
+        self.components[-1].set_margins(((WIDTH - self.components[-1].size[0])/ 2, (HEIGHT - self.components[-1].size[1])/ 2))
+        self.components.append(Text(self.screen, 'PRESSIONE ENTER', 'Noto Mono', 24, ORANGE_LIGHT))
+        # Texto instrucional
+        self.components[-1].init()
+        self.components[-1].set_blink()
+        self.components[-1].set_hover(BLUE)
+        self.components[-1].set_margins(((WIDTH - self.components[-1].size[0]) /2 , HEIGHT - 75 - 100))
+        #self.buttons.append(Button(
+        #                          self.screen,
+        #                          label="COMPLETAR",
+        #                          margin_box=((WIDTH / 2 - 220) /2 , HEIGHT - 75 - 100),
+        #                          src='play.png'
+        #                        )
+        #                    )
+        #self.buttons[-1].set_hover(GREEN_LIGHT, BLUE)
+        #self.buttons.append(Button(
+        #                          self.screen,
+        #                          label="FORCA",
+        #                          margin_box=(WIDTH /2 + (WIDTH / 2 - 220) /2 , HEIGHT - 75 - 100),
+        #                          src='play.png'
+        #                        )
+        #                    )
 
-        for button in self.buttons:
-            button.init()
+        for component in self.components:
+            component.init()
 
-    def refresh_screen(self):
-        self.screen.fill(BG_COLOR)
-        self.title.draw() if self.title else None
-        for button in self.buttons:
-            button.draw() if button else None
         pygame.display.set_caption(self.caption)
-        pygame.display.flip()
-
-    def get_event(self, event):
-        pass
-
-    def draw(self):
-        self.title.draw()
-        for button in self.buttons:
-            button.draw()
 
 class Window():
     def __init__(self):
@@ -107,6 +97,7 @@ class Window():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.play = False
             if self.pages['home'][0]:
+                self.pages['home'][1].get_event(event)
                 if event.type == pygame.MOUSEBUTTONUP:
                     if self.pages['home'][1].buttons[0].box.rendered.collidepoint(pygame.mouse.get_pos()):
                         self.change_page('menu')
@@ -117,6 +108,7 @@ class Window():
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         self.change_page('menu')
+                        self.pages['game'][1].game = 0
             elif self.pages['menu'][0]:
                 letters = [i + 65 for i in range(25) if i not in [7, 10, 22, 24]]
                 if event.type == pygame.KEYDOWN:

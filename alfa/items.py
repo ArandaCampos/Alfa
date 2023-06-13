@@ -1,27 +1,88 @@
 import pygame
 import os, pandas as pd
-from animation import blink
+from animations import Blink, Hover
 
 # Paleta de cores
 HEIGHT, WIDTH = 648, 1000
-WHITE, BLUE = (240, 240, 242, 242), (1, 32, 48, 255)
+BG_COLOR, BLUE, WHITE = (222, 239, 231, 240), (1, 32, 48, 255), (240, 240, 242, 242)
 ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 255), (154, 235, 163, 255)
 
 # Carregar diretório "Images"
 ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-IMG_PATH = os.path.join(ABS_PATH, 'Images')
+DATA_PATH = os.path.join(ABS_PATH, 'data')
+IMG_PATH = os.path.join(DATA_PATH, 'Images')
 
-class Image():
-    def __init__(self, screen, file: str, size: (int, int), margins: (int, int) = None):
+class Page():
+    def __init__ (self, screen, caption, bg_color: (int, int, int) = BG_COLOR):
 
         self.screen = screen
-        self.file = file
+        # Estilização
+        self.caption = caption
+        self.bg_color = bg_color
+        # Componentes
+        self.components = []
+
+    def modify_caption(self, caption):
+        self.caption = caption
+        pygame.display.set_caption(self.caption)
+
+    def refresh_screen(self):
+        self.screen.fill(self.bg_color)
+        for component in self.components:
+            component.draw()
+        pygame.display.flip()
+
+    def get_event(self, event):
+        for component in self.components:
+            component.events(event)
+
+class Component():
+    def __init__(self, screen, size, margins):
+        self.screen = screen
         # Estilização
         self.size = size
-        # Position
+        self.color = None
+        self.secondary_color = None
+        self.main_color = None
+        # Posicionamento
         self.margins = margins
-        # Render
+        # Renderizado
         self.rendered = None
+        self.surface =  None
+        # Animação
+        self.animations = []
+        # Eventos
+        self.hover = None
+        self.click = None
+
+    def set_margins(self, margins: [int, int]):
+        self.margins = margins
+
+    def set_size(self, size: str):
+        self.size = size
+
+    def set_hover(self, secondary: (int, int, int)):
+        self.colors = [self.color, secondary]
+        self.hover = True
+
+    def events(self, event: pygame.event):
+        pos = pygame.mouse.get_pos()
+        if self.hover:
+            self.color = self.colors[1] if self.rendered.collidepoint(pos) else self.colors[0]
+
+    def set_blink(self, velocity: int = 12):
+        blink = Blink(velocity)
+        self.animations.append(blink)
+
+    def play(self):
+        for animation in self.animations:
+            animation.play(self.surface, self.rendered)
+
+class Image(Component):
+    def __init__(self, screen, file: str, size: (int, int), margins: (int, int) = None):
+        super().__init__(screen, size, margins)
+
+        self.file = file
 
     def init(self):
         self.render()
@@ -29,17 +90,11 @@ class Image():
     def set_file(self, file: str):
         self.file = file
 
-    def set_size(self, size: str):
-        self.size = size
-
     def get_rect_center(self):
         return self.rendered.get_rect(center=self.get_center())
 
     def get_center(self) -> [int, int]:
         return [self.margins[0] + self.size[0] /2, self.margins[1] + self.size[1] /2]
-
-    def set_margins(self, margins: [int, int]):
-        self.margins = margins
 
     def render(self):
         self.rendered = pygame.image.load(os.path.join(IMG_PATH, self.file)).convert_alpha()
@@ -48,69 +103,49 @@ class Image():
     def draw(self):
         self.screen.blit(self.rendered, self.margins)
 
-class Text():
-    def __init__(self, screen, txt: str, family: str, size_font: int, color: [int, int, int, float], bold: bool = False):
+class Text(Component):
+    def __init__(self, screen, txt: str, family: str, size_font: int, color: [int, int, int, float], bold: bool = False, size:int=0, margins=(0,0)):
+        super().__init__(screen, size, margins)
 
-        self.screen = screen
         self.text = txt
         # Estilização
         self.family = family
         self.font_size = size_font
-        self.size = 0
         self.color = pygame.Color(color)
         self.font = None
         self.bold = bold
-        # Position
-        self.margins = 0
-        # Render
-        self.rendered = None
-        # Animação
-        self.blink = False
-        self.alpha = 255
 
     def init(self):
         self.font = pygame.font.SysFont(self.family, self.font_size, bold=self.bold)
         self.render()
 
-    def set_text(self, txt: str):
-        self.text = txt
-
     def get_center(self) -> [int, int]:
         _, _, w, h = self.rendered.get_rect()
         return [self.margins[0] + w /2, self.margins[1] + h /2]
 
-    def set_margins(self, margins: [int, int]):
-        self.margins = margins
-
-    def update(self, text):
-        self.text = text
+    def update(self, text: str = None, color: (int, int, int) = None):
+        self.text = text if text else self.text
+        self.color = color if color else self.color
         self.render()
 
     def render(self):
-        self.rendered = None
-        self.rendered = self.font.render('{}'.format(self.text), True, self.color)
-        _, _, w, h = self.rendered.get_rect()
+        self.surface = self.font.render('{}'.format(self.text), True, self.color)
+        _, _, w, h = self.surface.get_rect()
         self.size = (w, h)
 
     def draw(self):
-        self.rendered = self.font.render('{}'.format(self.text), True, self.color)
-        if self.blink:
-            self.alpha = blink(self.alpha)
-            self.rendered.set_alpha(self.alpha)
-        self.screen.blit(self.rendered, self.margins)
+        self.surface = self.font.render('{}'.format(self.text), True, self.color)
+        self.play()
+        self.rendered = self.screen.blit(self.surface, self.margins)
+        #self.play()
 
-class Box():
+class Box(Component):
     def __init__(self, screen, size, margins = (0, 0), color = ORANGE_LIGHT, border_radius = 8):
+        super().__init__(screen, size, margins)
 
-        self.screen = screen
         # Estilização
         self.color = color
         self.border_radius = border_radius
-        # Position
-        self.size = size
-        self.margins = margins
-        # Render
-        self.rendered = None
 
     def init(self):
         self.rendered = pygame.Rect(self.margins[0], self.margins[1], self.size[0], self.size[1])
@@ -119,9 +154,10 @@ class Box():
         return [self.margins[0] + self.size[0] /2, self.margins + self.size[1] /2]
 
     def draw(self):
-        pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
+        self.blited = pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
+        self.play()
 
-class Button():
+class Button(Component):
     def __init__(self,
                  screen,
                  label: str = None,
@@ -134,24 +170,16 @@ class Button():
                  src: str = None,
                  size_img: (int, int) =  (20, 20)
                 ):
-        self.screen = screen
-        self.box = None
-        self.size_box = size_box
-        self.margin_box = margin_box
+        super().__init__(screen, size_box, margin_box)
+
+        self.box = Box(screen, size_box, margin_box, color=color_box, border_radius=border_radius)
         self.color_box = color_box
-        self.border_radius = border_radius
-        self.label = None
-        self.txt_label = label
+        self.label = Text(screen, label, 'Noto Mono', size_label, color_label) if label else None
         self.color_label = color_label
-        self.size_label = size_label
-        self.src = src
-        self.image = None
+        self.image = Image(screen, src, (20,20)) if src else None
 
     def init(self):
-        self.box = Box(self.screen, self.size_box, self.margin_box, color=self.color_box, border_radius=self.border_radius)
-        self.label = Text(self.screen, self.txt_label, 'Noto Mono', self.size_label, self.color_label) if self.txt_label else None
-        self.image = Image(self.screen, self.src, (20,20)) if self.src else None
-        self.box.init()
+        self.box.init() if self.box else None
         self.label.init() if self.label else None
         self.image.init() if self.image else None
         if self.image and self.label:
@@ -185,6 +213,23 @@ class Button():
                 self.box.margins[1] + (self.box.size[1] - self.label.size[1]) / 2
             ))
 
+    def set_hover(self, secondary_box: (int, int, int), secondary_label: (int, int, int) = None):
+        self.box_colors = [self.color_box, secondary_box]
+        self.label_colors = [self.color_label, secondary_label] if self.label else None
+        self.hover = True
+
+    def events(self, event: pygame.event):
+        pos = pygame.mouse.get_pos()
+        if self.hover:
+            if self.box.rendered.collidepoint(pos):
+                self.box.color = self.box_colors[1]
+                if self.label:
+                    self.label.color = self.label_colors[1]
+            else:
+                self.box.color = self.box_colors[0]
+                if self.label:
+                    self.label.color = self.label_colors[0]
+
     def draw(self):
         self.box.draw()
         self.label.draw() if self.label else None
@@ -216,52 +261,6 @@ class Score():
 
     def draw(self):
         self.text.draw()
-        self.image.draw()
-
-class Button_play_game():
-    def __init__(self, screen):
-
-        self.screen = screen
-        # Botão
-        self.button = Box(screen, (220, 75), ((WIDTH - 220) / 2, HEIGHT - 75 - 150), ORANGE_LIGHT, 8)
-        # Etiqueta
-        self.label = Text(screen, 'COMPLETAR', 'Noto Mono', 20, WHITE)
-        # Ícone
-        self.image = Image(screen, 'play.png', (20,20))
-
-    def init(self):
-        self.button.init()
-        self.label.init()
-        self.label.set_margins((self.button.margins[0] + 35 , self.button.margins[1] + (75 - self.label.size[1]) / 2))
-        self.image.init()
-        self.image.set_margins((self.button.margins[0] + self.button.size[0] - self.image.size[0] - 35, self.button.margins[1] + (75 - self.image.size[1])/2))
-
-    def draw(self):
-        self.button.draw()
-        self.label.draw()
-        self.image.draw()
-
-class Button_play_hangman():
-    def __init__(self, screen):
-
-        self.screen = screen
-        # Botão
-        self.button = Box(screen, (220, 75), ((WIDTH - 220) / 2, HEIGHT - 75 - 50), ORANGE_LIGHT, 8)
-        # Etiqueta
-        self.label = Text(screen, 'FORCA', 'Noto Mono', 20, WHITE)
-        # Ícone
-        self.image = Image(screen, 'play.png', (20,20))
-
-    def init(self):
-        self.button.init()
-        self.label.init()
-        self.label.set_margins((self.button.margins[0] + 35 , self.button.margins[1] + (75 - self.label.size[1]) / 2))
-        self.image.init()
-        self.image.set_margins((self.button.margins[0] + self.button.size[0] - self.image.size[0] - 35, self.button.margins[1] + (75 - self.image.size[1])/2))
-
-    def draw(self):
-        self.button.draw()
-        self.label.draw()
         self.image.draw()
 
 class Menu():

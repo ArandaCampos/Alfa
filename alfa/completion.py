@@ -5,7 +5,7 @@
 
 import os
 from items import Text, Score, Rank, Menu, Button, Image
-from animation import blink
+#from animation import blink
 from games import Hangman, Toggle_letter
 
 try:
@@ -47,7 +47,8 @@ HEIGHT, WIDTH = 648, 1000
 
 # Carregar diretório "Audio"
 ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-AUD_PATH = os.path.join(ABS_PATH, 'Audio')
+DATA_PATH = os.path.join(ABS_PATH, 'data')
+AUD_PATH = os.path.join(DATA_PATH, 'Audio')
 
 def to_read(word: str):
     # Lê o texto escrito pelo usuário
@@ -109,10 +110,10 @@ class Game():
     def load_data(self):
         # Toggle letter
         if self.game == 0:
-            file = f'Data/{self.stage}.csv'
+            file = f'data/{self.stage}.csv'
         # Hangman
         elif self.game == 1:
-            file = 'Data/hangman.csv'
+            file = 'data/hangman.csv'
         self.df = pd.DataFrame(pd.read_csv(file, sep=" "))
         self.option = self.df["answer"].unique() if self.game == 0 else None
         self.df = self.df.sample(frac=1).reset_index(drop=True)
