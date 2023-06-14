@@ -69,6 +69,9 @@ class Game_complete(Page):
         self.round = 0
         self.option = None
 
+    def func_back(self, event=None):
+        self.func(Menu_complete(self.screen, self.func))
+
     def func_click_sound(self, event=None):
         to_read(self.components[6].get_word())
 
@@ -127,7 +130,7 @@ class Game_complete(Page):
                                       margin_box=(WIDTH - 120 - 220, HEIGHT - 110),
                                       color_box=GREEN_LIGHT, src="send.png"
                                       ))
-        self.components.append(Image(self.screen, 'back.png', (30, 30), (25,25)))
+        self.components.append(Image(self.screen, 'back.png', (25, 25), (25,25)))
         self.components.append(Image(self.screen, self.df["file"][self.round], (250, 250), ((WIDTH - 250) / 2, 50)))
         self.components.append(Toggle_letter(self.screen, self.df["word"][self.round], self.option, self.df["answer"][self.round]))
         self.components.append(Image(self.screen, 'sound.png', (31.4, 30)))
@@ -144,6 +147,7 @@ class Game_complete(Page):
         self.components[2].set_hover(ORANGE, WHITE)
         self.components[3].set_click(self.func_click_btn_send)
         self.components[3].set_hover(GREEN, BLUE)
+        self.components[4].set_click(self.func_back)
         self.components[6].set_keydown(self.func_keydown)
         self.components[7].set_click(self.func_click_sound)
 
@@ -158,11 +162,21 @@ class Game_complete(Page):
     def next_round(self):
         if self.round == 9 or self.round == len(self.df) - 1:
             # Fim de jogo (10 rodadas ou até o fim das imagens)
-            game = pd.DataFrame({"user": ["Renan"], "score": [self.components[1].text]})
+            try:
+                rank = pd.DataFrame(pd.read_csv(f"data/rank_{self.stage}.csv", sep=" "))
+            except:
+                rank = pd.DataFrame({"user": [], "score": []})
+            last_game = pd.DataFrame({
+                "user": ["Mônica"],
+                "score": [int(self.components[1].text)]
+            })
+            rank = pd.concat([rank, last_game], ignore_index=True)
+            rank = rank.sort_values(by='score', ascending=False)
+            #position = rank.index[rank['score'] == self.score].tolist()
+            rank.to_csv(f"data/rank_{self.stage}.csv", sep=" ", index=False)
+
             self.play = 0
-            self.func(Menu_complete(self.screen, self.func))
-            #self.rank = Rank(self.screen, self.components[0].text.text, self.stage)
-            #self.rank.init()
+            self.func(Rank_complete(self.screen, self.func, self.components[1].text, self.stage))
         else:
             # Próxima rodada
             self.round += 1
@@ -180,7 +194,6 @@ class Menu_complete(Page):
     def __init__(self, screen, func):
         super().__init__(screen, "MENU DE OPÇÕES - ALFA", BG_COLOR, func)
 
-        self.name = 'Menu'
         # [7, 10, 22, 24] =~ [H, K, Y, W]
         self.options = [65 + i for i in range(25) if i not in [7, 10, 22, 24]]
         # Positionamento
@@ -194,12 +207,10 @@ class Menu_complete(Page):
                     game = Game_complete(self.screen, self.func)
                     game.set_stage(component.label.text.lower())
                     self.func(game)
-                    print(component.label.text)
             except:
                 pass
 
     def func_keydown(self, event):
-        print('clicou '+ event.unicode)
         if ord(event.unicode.upper()) in self.options:
             game = Game_complete(self.screen, self.func)
             game.set_stage(event.unicode.lower())
@@ -224,3 +235,38 @@ class Menu_complete(Page):
 
         self.components[-1].set_click(self.func_click)
         self.components[-1].set_keydown(self.func_keydown)
+
+class Rank_complete(Page):
+    def __init__(self,screen, func, score: int, stage: str):
+        super().__init__(screen, "FIM DE JOGO - ALFA", BG_COLOR, func)
+        self.score = score
+        self.stage = stage
+
+    def func_to_menu(self, event = None):
+        self.func(Menu_complete(self.screen, self.func))
+
+    def init(self):
+        self.components.append(Image(self.screen, 'medal.png', (250, 250)))
+        self.components.append(Text(self.screen, f'JOGO - {self.stage.upper()}', 'Noto Mono', 24, BLUE))
+        self.components.append(Text(self.screen, f'{self.score} PONTOS', 'Noto Mono', 50, ORANGE_LIGHT))
+        self.components.append(Text(self.screen, 'PRESSIONE QUALQUER TECLA PARA CONTINUAR', 'Noto Mono', 24, BLUE))
+        for component in self.components:
+            component.init()
+        self.components[0].set_margins((
+            (WIDTH - self.components[0].size[0])/2,
+            120
+        ))
+        self.components[1].set_margins((
+            (WIDTH - self.components[1].size[0]) / 2,
+            self.components[0].margins[1] + self.components[0].size[1] + 30
+        ))
+        self.components[2].set_margins((
+            (WIDTH - self.components[2].size[0]) / 2,
+            self.components[1].margins[1] + self.components[1].size[1] + 10
+        ))
+        self.components[3].set_margins((
+            (WIDTH - self.components[3].size[0]) / 2,
+            self.components[2].margins[1] + self.components[2].size[1] + 30
+        ))
+        self.components[3].set_blink()
+        self.components[3].set_keydown(self.func_to_menu)

@@ -1,7 +1,7 @@
 import os
 from complete import Game_complete, Menu_complete
 from items import Button, Text, Page
-from animations import Blink
+#from animations import Blink
 
 try:
     import pygame
@@ -52,7 +52,6 @@ class Window():
         self.page.init()
 
     def change_page(self, page):
-        print("Modificando para página " + str(page))
         self.page = page
         self.page.init()
 

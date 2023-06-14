@@ -120,6 +120,7 @@ class Image(Component):
 
     def draw(self):
         self.rendered = self.screen.blit(self.surface, self.margins)
+        self.play()
 
 class Text(Component):
     def __init__(self, screen, txt: str, family: str, size_font: int, color: [int, int, int, float], bold: bool = False, size:int=0, margins=(0,0)):
@@ -173,6 +174,7 @@ class Box(Component):
 
     def draw(self):
         self.surface = pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
+        self.play()
 
 class Button(Component):
     def __init__(self,
@@ -257,43 +259,3 @@ class Button(Component):
         self.box.draw()
         self.label.draw() if self.label else None
         self.image.draw() if self.image else None
-
-class Rank():
-    def __init__(self,screen, score: int, stage: str):
-
-        self.screen = screen
-        # Imagem
-        self.image = Image(screen, 'medal.png', (250, 250))
-        # Texto
-        self.stage = stage
-        self.score = score
-        self.legend = Text(screen, f'FAMÍLIA - {self.stage.upper()}', 'Noto Mono', 14, BLUE)
-        self.text = Text(screen, f'{self.score} PONTOS', 'Noto Mono', 30, BLUE)
-
-    def init(self):
-        self.image.init()
-        self.legend.init()
-        self.text.init()
-        self.image.set_margins(((WIDTH - self.image.size[0])/2, 120))
-        self.legend.set_margins(((WIDTH - self.legend.size[0]) / 2, self.image.margins[1] + self.image.size[1] + 15))
-        self.text.set_margins(((WIDTH - self.text.size[0]) / 2, self.legend.margins[1] + self.legend.size[1] + 20))
-        self.save()
-
-    def save(self):
-        try:
-            rank = pd.DataFrame(pd.read_csv(f"Data/rank_{self.stage}.csv", sep=" "))
-        except:
-            rank = pd.DataFrame({"user": [], "score": []})
-        last_game = pd.DataFrame({
-            "user": ["Mônica"],
-            "score": [self.score]
-        })
-        rank = pd.concat([rank, last_game], ignore_index=True)
-        rank = rank.sort_values(by='score', ascending=False)
-        #position = rank.index[rank['score'] == self.score].tolist()
-        rank.to_csv(f"Data/rank_{self.stage}.csv", sep=" ", index=False)
-
-    def draw(self):
-        self.image.draw()
-        self.legend.draw()
-        self.text.draw()

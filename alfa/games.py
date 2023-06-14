@@ -129,7 +129,6 @@ class Toggle_letter(Component):
                 self.margins[0][1] + (self.size_letters[0][1] - self.size_letters[i][1])
                 ]
             )
-        print(len(self.margins))
 
     def draw(self):
         self.render_letters_and_set_position()
