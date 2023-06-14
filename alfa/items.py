@@ -1,6 +1,6 @@
 import pygame
 import os, pandas as pd
-from animations import Blink, Hover
+from animations import Blink
 
 # Paleta de cores
 HEIGHT, WIDTH = 648, 1000
@@ -13,7 +13,7 @@ DATA_PATH = os.path.join(ABS_PATH, 'data')
 IMG_PATH = os.path.join(DATA_PATH, 'Images')
 
 class Page():
-    def __init__ (self, screen, caption, bg_color: (int, int, int) = BG_COLOR):
+    def __init__ (self, screen, caption, bg_color: (int, int, int) = BG_COLOR, func = None):
 
         self.screen = screen
         # Estilização
@@ -21,6 +21,11 @@ class Page():
         self.bg_color = bg_color
         # Componentes
         self.components = []
+        # Função herdada
+        self.func = func
+
+    def __str__(self):
+        return self.__class__.__name__
 
     def modify_caption(self, caption):
         self.caption = caption
@@ -54,6 +59,7 @@ class Component():
         # Eventos
         self.hover = None
         self.click = None
+        self.keydown = None
 
     def set_margins(self, margins: [int, int]):
         self.margins = margins
@@ -65,10 +71,22 @@ class Component():
         self.colors = [self.color, secondary]
         self.hover = True
 
+    def set_click(self, func):
+        self.click = func
+
+    def set_keydown(self, func):
+        self.keydown = func
+
     def events(self, event: pygame.event):
         pos = pygame.mouse.get_pos()
         if self.hover:
             self.color = self.colors[1] if self.rendered.collidepoint(pos) else self.colors[0]
+        if self.click:
+            if event.type == pygame.MOUSEBUTTONUP and self.rendered.collidepoint(pos):
+                self.click()
+        if self.keydown:
+            if event.type == pygame.KEYDOWN:
+                self.keydown(event)
 
     def set_blink(self, velocity: int = 12):
         blink = Blink(velocity)
@@ -97,11 +115,11 @@ class Image(Component):
         return [self.margins[0] + self.size[0] /2, self.margins[1] + self.size[1] /2]
 
     def render(self):
-        self.rendered = pygame.image.load(os.path.join(IMG_PATH, self.file)).convert_alpha()
-        self.rendered = pygame.transform.scale(self.rendered, self.size)
+        self.surface = pygame.image.load(os.path.join(IMG_PATH, self.file)).convert_alpha()
+        self.surface = pygame.transform.scale(self.surface, self.size)
 
     def draw(self):
-        self.screen.blit(self.rendered, self.margins)
+        self.rendered = self.screen.blit(self.surface, self.margins)
 
 class Text(Component):
     def __init__(self, screen, txt: str, family: str, size_font: int, color: [int, int, int, float], bold: bool = False, size:int=0, margins=(0,0)):
@@ -154,8 +172,7 @@ class Box(Component):
         return [self.margins[0] + self.size[0] /2, self.margins + self.size[1] /2]
 
     def draw(self):
-        self.blited = pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
-        self.play()
+        self.surface = pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
 
 class Button(Component):
     def __init__(self,
@@ -208,7 +225,7 @@ class Button(Component):
             # Centraliza o label
             self.label.set_margins((
                 # x
-                self.box.margins[0] + (self.box.size[0] - self.image.size[0]) / 2,
+                self.box.margins[0] + (self.box.size[0] - self.label.size[0]) / 2,
                 # y
                 self.box.margins[1] + (self.box.size[1] - self.label.size[1]) / 2
             ))
@@ -229,69 +246,17 @@ class Button(Component):
                 self.box.color = self.box_colors[0]
                 if self.label:
                     self.label.color = self.label_colors[0]
+        if self.click:
+            if event.type == pygame.MOUSEBUTTONUP:
+                self.click()
+        if self.keydown:
+            if event.type == pygame.KEYDOWN:
+                self.keydown(event)
 
     def draw(self):
         self.box.draw()
         self.label.draw() if self.label else None
         self.image.draw() if self.image else None
-
-class Score():
-    def __init__(self, screen):
-
-        # Janela
-        self.screen = screen
-        # Imagem
-        self.image = Image(screen, 'medal.png', (42,42))
-        # Texto
-        self.score = 0
-        self.text = Text(screen, self.score, 'Noto Mono', 28, BLUE)
-
-    def init(self):
-        self.image.init()
-        self.image.set_margins((WIDTH - self.image.size[0]- 25, 25))
-        self.text.init()
-        self.text.set_margins((WIDTH - self.image.size[0] - 25 - self.text.size[0] - 10, 25 + (42 - self.text.size[1])/2))
-
-    def update(self, point: int = False, increment: bool = False, decrement: bool = False):
-        if point: self.score = point
-        elif increment: self.score += 1
-        elif decrement: self.score = self.score - 1
-        self.text.update(self.score)
-        self.text.set_margins((WIDTH - self.image.size[0] - 25 - self.text.size[0] - 10, 25))
-
-    def draw(self):
-        self.text.draw()
-        self.image.draw()
-
-class Menu():
-    def __init__(self, screen):
-
-        self.screen = screen
-        # Botões
-        self.button = []
-        # Etiquetas
-        self.label = []
-
-    def init(self):
-        line, column = 4, 6
-        space_btn = 70 * column + 30 * (column - 1)
-        # [7, 10, 22, 24] =~ [H, K, Y, W]
-        letters = [i for i in range(25) if i not in [7, 10, 22, 24]]
-        for j in range(line):
-            for i in range(column):
-                if i + column * j in range(len(letters)):
-                    self.button.append(Box(self.screen, (70, 70), ((WIDTH - space_btn)/2 + 100 * i, 200 + 100 * j), GREEN_LIGHT, 8))
-                    self.button[-1].init()
-                    self.label.append(Text(self.screen, chr(65 + letters[i + column * j]), 'Noto Mono', 20, BLUE))
-                    self.label[-1].init()
-                    self.label[-1].set_margins(
-                        (self.button[-1].margins[0] + (70 - self.label[-1].size[0]) / 2 , self.button[-1].margins[1] + (70 - self.label[-1].size[1]) / 2)
-                    )
-
-    def draw(self):
-        for i in range(len(self.button)):
-            self.button[i].draw()
-            self.label[i].draw()
 
 class Rank():
     def __init__(self,screen, score: int, stage: str):

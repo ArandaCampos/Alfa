@@ -4,13 +4,14 @@ except ImportError:
     print('Erro ao importar a biblioteca Pygame.')
     raise SystemExit
 
+from items import Component
 #from components import Text
 
 WIDTH = 1000
 ORANGE, BLUE = (250, 127, 8, .98), (1, 32, 48, 1.)
 MARGIN_TOP = 390
 
-class Toggle_letter():
+class Toggle_letter(Component):
     MARGIN_TOP = 390
 
     """
@@ -27,7 +28,8 @@ class Toggle_letter():
     --------------------------------------------
     """
 
-    def __init__ (self, screen, word: str, options: (str), answers: (str)):
+    def __init__ (self, screen, word: str, options: (str), answers: (str), size: int =  None, margins: (int, int) = None):
+        super().__init__(screen, size, margins)
 
         self.screen = screen
         # Parâmetros do Jogo
@@ -51,6 +53,19 @@ class Toggle_letter():
     def init(self):
         self.render_letters_and_set_position()
         self.set_margins()
+
+    def new_game(self, word, options, answers):
+        self.letters = word.upper().split("*")
+        self.options = list(options)
+        self.values  = [0 for i, item in enumerate(self.letters) if item == '']
+        self.fields  = [i for i, item in enumerate(self.letters) if item == '']
+        self.key     = 0
+        self.answers = answers
+        self.size = []
+        self.size_letters = []
+        self.rendered_letters = []
+        self.margins = []
+
 
     def update_fields(self):
         for i, field in enumerate(self.fields):
@@ -114,6 +129,7 @@ class Toggle_letter():
                 self.margins[0][1] + (self.size_letters[0][1] - self.size_letters[i][1])
                 ]
             )
+        print(len(self.margins))
 
     def draw(self):
         self.render_letters_and_set_position()
