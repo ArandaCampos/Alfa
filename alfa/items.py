@@ -83,6 +83,7 @@ class Component():
             self.color = self.colors[1] if self.rendered.collidepoint(pos) else self.colors[0]
         if self.click:
             if event.type == pygame.MOUSEBUTTONUP and self.rendered.collidepoint(pos):
+                print('clicou em mim')
                 self.click()
         if self.keydown:
             if event.type == pygame.KEYDOWN:
@@ -108,11 +109,11 @@ class Image(Component):
     def set_file(self, file: str):
         self.file = file
 
-    def get_rect_center(self):
-        return self.rendered.get_rect(center=self.get_center())
-
     def get_center(self) -> [int, int]:
         return [self.margins[0] + self.size[0] /2, self.margins[1] + self.size[1] /2]
+
+    def get_rect_center(self):
+        return self.rendered.get_rect(center=self.get_center())
 
     def render(self):
         self.surface = pygame.image.load(os.path.join(IMG_PATH, self.file)).convert_alpha()
@@ -249,7 +250,7 @@ class Button(Component):
                 if self.label:
                     self.label.color = self.label_colors[0]
         if self.click:
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and self.box.rendered.collidepoint(pos):
                 self.click()
         if self.keydown:
             if event.type == pygame.KEYDOWN:

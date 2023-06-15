@@ -4,7 +4,7 @@
 # --------------------------------------------
 
 import os
-from items import Text, Rank, Button, Image, Page
+from items import Text, Button, Image, Page
 from games import Hangman, Toggle_letter
 
 try:
@@ -70,9 +70,11 @@ class Game_complete(Page):
         self.option = None
 
     def func_back(self, event=None):
+        pos = pygame.mouse.get_pos()
         self.func(Menu_complete(self.screen, self.func))
 
     def func_click_sound(self, event=None):
+        pos = pygame.mouse.get_pos()
         to_read(self.components[6].get_word())
 
     def func_click_btn_send(self, event=None):
@@ -200,15 +202,13 @@ class Menu_complete(Page):
         self.grid = (4, 6)
         self.gap = 70 * self.grid[1] + 30 * (self.grid[1] - 1)
 
-    def func_click(self):
-        for component in self.components:
-            try:
-                if component.box.rendered.collidepoint(pygame.mouse.get_pos()):
-                    game = Game_complete(self.screen, self.func)
-                    game.set_stage(component.label.text.lower())
-                    self.func(game)
-            except:
-                pass
+    def func_generic(self, letter):
+        def func_click():
+            nonlocal letter
+            game = Game_complete(self.screen, self.func)
+            game.set_stage(letter.lower())
+            self.func(game)
+        return func_click
 
     def func_keydown(self, event):
         if ord(event.unicode.upper()) in self.options:
@@ -224,16 +224,17 @@ class Menu_complete(Page):
         for l in range(self.grid[0]):
             for c in range(self.grid[1]):
                 if c + self.grid[1] * l in range(len(self.options)):
+                    char = chr(self.options[c + self.grid[1] * l])
                     self.components.append(Button(
                                   self.screen,
-                                  label=chr(self.options[c + self.grid[1] * l]), color_label=BLUE,
+                                  label=char, color_label=BLUE,
                                   size_box=(70,70), color_box=GREEN_LIGHT,
                                   margin_box=((WIDTH - self.gap)/2 + 100 * c, 200 + 100 * l)
                             ))
                     self.components[-1].init()
                     self.components[-1].set_hover(ORANGE_LIGHT, WHITE)
+                    self.components[-1].set_click(self.func_generic(char))
 
-        self.components[-1].set_click(self.func_click)
         self.components[-1].set_keydown(self.func_keydown)
 
 class Rank_complete(Page):
