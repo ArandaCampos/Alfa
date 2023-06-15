@@ -3,7 +3,7 @@
 #   Github: github.com/ArandaCampos
 # --------------------------------------------
 
-import os
+import os, time
 from items import Text, Button, Image, Page, Component
 from games import Hangman
 from constants import Colors, Params
@@ -49,77 +49,50 @@ def to_read(word: str):
     playsound("audio.mp3")
 
 class Toggle_letter(Component):
-    """
-    +------------------------------------------+
-    |                                          |
-    |        +--------+--------+---> fields    |
-    |        |        |        |               |
-    |    +--------+--------+--------+          |
-    |    | option | option | option |          |
-    |    +--------+--------+--------+          |
-    |        |                                 |
-    |        +--> key                          |
-    |                                          |
-    +------------------------------------------+
-    """
-    def __init__ (self, screen, word: str, options: (str), answers: (str), size: int =  [0,0], margins: (int, int) = [0,0]):
+    def __init__ (self, screen, word: str, options: (str), answer: (str), size: int =  [0,0], margins: (int, int) = [0,0]):
         super().__init__(screen, size, margins)
 
         # Parâmetros do Jogo
         self.letters = word.upper().split("*")
         self.options = list(options)
-        self.values  = [0 for i, item in enumerate(self.letters) if item == '']
-        self.fields  = [i for i, item in enumerate(self.letters) if item == '']
-        self.key     = 0
-        self.answers = answers
+        self.key     = self.letters.index("")
+        self.answer = word.replace('*', answer)
         self.components = []
 
     def init(self):
-        for i, field in enumerate(self.fields):
-            self.letters[field] = self.options[self.values[i]]
+        self.letters[self.key] = self.options[0]
         self.render()
 
-    def new_game(self, word, options, answers):
+    def new_game(self, word, options, answer):
         self.letters = word.upper().split("*")
         self.options = list(options)
-        self.values  = [0 for i, item in enumerate(self.letters) if item == '']
-        self.fields  = [i for i, item in enumerate(self.letters) if item == '']
-        self.answers = answers
-        self.size, self.key = [0,0], 0
-        self.size_letters = self.rendered_letters = self.margins = []
+        self.key     = self.letters.index("")
+        self.answer = word.replace('*', answer)
+        self.size = [0,0]
+        self.margins = []
 
     def toggle_value(self, value: int = None, increment: bool = False, decrement: bool = False, letter: str = False):
-        if value:
-            self.values[self.key] = value if value in range(len(self.options) - 1) else self.values[self.key]
-        elif increment:
-            self.values[self.key] = self.values[self.key] + 1 if self.values[self.key] < len(self.options) - 1 else 0
-        elif decrement:
-            self.values[self.key] = self.values[self.key] - 1 if self.values[self.key] > 0 else len(self.options) - 1
-        elif letter:
+        if letter:
             if len(self.options[0]) == 1:
-                self.values[self.key] = self.options.index(letter.upper()) if letter.upper() in self.options else self.values[self.key]
+                self.letters[self.key] = self.options.index(letter.upper()) if letter.upper() in self.options else self.letters[self.key]
             else:
-                for key, option in enumerate(self.options):
-                    self.values[self.key] = key if letter.upper() == option[1] else self.values[self.key]
-        self.letters[self.fields[self.key]] = self.options[self.values[self.key]]
-        self.components[self.fields[self.key]].text = self.options[self.values[self.key]]
-
-    def toggle_key(self, value: int = None, increment: bool = False, decrement: bool = False):
-        if value:
-            self.key = value if value in range(len(self.values)) else self.key
-        elif increment:
-            self.key = self.key + 1 if self.key < len(self.values) - 1 else 0
-        elif decrement:
-            self.key = self.key - 1 if self.key > 0 else len(self.values) - 1
+                for option in self.options:
+                    self.letters[self.key] = option if letter.upper() == option[1] else self.letters[self.key]
+        else:
+            index = self.options.index(self.letters[self.key])
+            if increment:
+                self.letters[self.key] = self.options[index + 1] if index < len(self.options) - 1 else self.options[0]
+            elif decrement:
+                self.letters[self.key] = self.options[index - 1] if index > 1 else self.options[-1]
+        self.components[self.key].text = self.letters[self.key]
 
     def render(self):
         self.components = []
         for i, letter in enumerate(self.letters):
-            self.components.append(Text(self.screen, letter, 'Noto Mono', 80, COLOR.ORANGE if i in self.fields else COLOR.BLUE_DARK))
+            self.components.append(Text(self.screen, letter, 'Noto Mono', 80, COLOR.ORANGE if i == self.key else COLOR.BLUE_DARK))
             self.components[-1].init()
             self.size[0] += self.components[-1].size[0]
             self.size[1] = self.components[-1].size[1] if self.components[-1].size[1] > self.size[1] else self.size[1]
-
         self.margins = ((PARAMS.WIDTH - self.size[0])/2, 390)
         self.components[0].set_margins(self.margins)
         for i in range(1, len(self.letters)):
@@ -129,10 +102,7 @@ class Toggle_letter(Component):
             ))
 
     def response(self):
-        for index, value in enumerate(self.values):
-            if self.options[value] != self.answers:
-                return 0
-        return 1
+        return self.get_word() == self.answer.lower()
 
     def get_word(self):
         return "".join(self.letters).lower()
@@ -229,8 +199,6 @@ class Game_complete(Page):
         # Marigins relativas
         self.components[1].set_margins((PARAMS.WIDTH - 42 - 25 - self.components[1].size[0] - 10, 25 + (42 - self.components[1].size[1])/2))
         self.components[7].set_margins((
-            #self.components[6].margins[0][0] + self.components[6].size[0] + 60,
-            #self.components[6].margins[0][1] + (self.components[6].size[1] - self.components[-1].size[1]) / 2
             self.components[6].margins[0] + self.components[6].size[0] + 60,
             self.components[6].margins[1] + (self.components[6].size[1] - self.components[-1].size[1]) / 2
         ))
