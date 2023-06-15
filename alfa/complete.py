@@ -4,8 +4,9 @@
 # --------------------------------------------
 
 import os
-from items import Text, Button, Image, Page
+from items import Text, Button, Image, Page, Component
 from games import Hangman
+from constants import Colors, Params
 
 try:
     import pygame
@@ -37,15 +38,9 @@ except ImportError:
     print("Erro ao importar a biblioteca Playsound. Tente $ pip install playsound")
     raise SystemExit
 
-# Paleta de cor
-BG_COLOR, BLUE, WHITE = (222, 239, 231, 240), (1, 32, 48, 255), (240, 240, 242, 242)
-ORANGE_LIGHT, ORANGE, GREEN_LIGHT, GREEN = (242, 68, 5, 255), (250, 127, 8, 250), (154, 235, 163, 255), (131, 199, 115, 198)
-# Altura e largura da tela
-HEIGHT, WIDTH = 648, 1000
-# Carregar diretório "Audio"
-ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-DATA_PATH = os.path.join(ABS_PATH, 'data')
-AUD_PATH = os.path.join(DATA_PATH, 'Audio')
+# Constantes
+COLOR = Colors()
+PARAMS = Params()
 
 def to_read(word: str):
     # Lê o texto escrito pelo usuário
@@ -120,12 +115,12 @@ class Toggle_letter(Component):
     def render(self):
         self.components = []
         for i, letter in enumerate(self.letters):
-            self.components.append(Text(self.screen, letter, 'Noto Mono', 80, ORANGE if i in self.fields else BLUE))
+            self.components.append(Text(self.screen, letter, 'Noto Mono', 80, COLOR.ORANGE if i in self.fields else COLOR.BLUE_DARK))
             self.components[-1].init()
             self.size[0] += self.components[-1].size[0]
             self.size[1] = self.components[-1].size[1] if self.components[-1].size[1] > self.size[1] else self.size[1]
 
-        self.margins = ((WIDTH - self.size[0])/2, 390)
+        self.margins = ((PARAMS.WIDTH - self.size[0])/2, 390)
         self.components[0].set_margins(self.margins)
         for i in range(1, len(self.letters)):
             self.components[i].set_margins((
@@ -149,11 +144,11 @@ class Toggle_letter(Component):
 class Game_complete(Page):
     pygame.init()
     def __init__(self, screen, func):
-        super().__init__(screen, "COMPLETAR - ALFA", BG_COLOR, func)
+        super().__init__(screen, "COMPLETAR - ALFA", COLOR.WHITE, func)
         self.name = 'Game'
         # Componentes
-        self.sound_win = pygame.mixer.Sound(os.path.join(AUD_PATH, 'win.wav'))
-        self.sound_fail = pygame.mixer.Sound(os.path.join(AUD_PATH, 'failed.wav'))
+        self.sound_win = PARAMS.SOUND_WIN
+        self.sound_fail = PARAMS.SOUND_FAIL
         # Gabarito da rodada
         self.game = None
         self.df = None
@@ -216,23 +211,23 @@ class Game_complete(Page):
         """
         self.round, self.play = 0, 1
         self.load_data()
-        self.components.append(Image(self.screen, 'medal.png', (42, 42), (WIDTH - 42 - 25, 25)))
-        self.components.append(Text(self.screen, '0', 'Noto Mono', 28, BLUE))
-        self.components.append(Button(self.screen, label="NÃO SEI", margin_box=(120, HEIGHT - 110), src="cancel.png"))
+        self.components.append(Image(self.screen, 'medal.png', (42, 42), (PARAMS.WIDTH - 42 - 25, 25)))
+        self.components.append(Text(self.screen, '0', 'Noto Mono', 28, COLOR.BLUE_DARK))
+        self.components.append(Button(self.screen, label="NÃO SEI", margin_box=(120, PARAMS.HEIGHT - 110), src="cancel.png"))
         self.components.append(Button(self.screen,
                                       label="ENVIAR",
-                                      color_label=BLUE,
-                                      margin_box=(WIDTH - 120 - 220, HEIGHT - 110),
-                                      color_box=GREEN_LIGHT, src="send.png"
+                                      color_label=COLOR.BLUE_DARK,
+                                      margin_box=(PARAMS.WIDTH - 120 - 220, PARAMS.HEIGHT - 110),
+                                      color_box=COLOR.GREEN, src="send.png"
                                       ))
         self.components.append(Image(self.screen, 'back.png', (25, 25), (25,25)))
-        self.components.append(Image(self.screen, self.df["file"][self.round], (250, 250), ((WIDTH - 250) / 2, 50)))
+        self.components.append(Image(self.screen, self.df["file"][self.round], (250, 250), ((PARAMS.WIDTH - 250) / 2, 50)))
         self.components.append(Toggle_letter(self.screen, self.df["word"][self.round], self.option, self.df["answer"][self.round]))
         self.components.append(Image(self.screen, 'sound.png', (31.4, 30)))
         for component in self.components:
             component.init()
         # Marigins relativas
-        self.components[1].set_margins((WIDTH - 42 - 25 - self.components[1].size[0] - 10, 25 + (42 - self.components[1].size[1])/2))
+        self.components[1].set_margins((PARAMS.WIDTH - 42 - 25 - self.components[1].size[0] - 10, 25 + (42 - self.components[1].size[1])/2))
         self.components[7].set_margins((
             #self.components[6].margins[0][0] + self.components[6].size[0] + 60,
             #self.components[6].margins[0][1] + (self.components[6].size[1] - self.components[-1].size[1]) / 2
@@ -241,9 +236,9 @@ class Game_complete(Page):
         ))
         # Eventos
         self.components[2].set_click(self.func_click_btn_cancel)
-        self.components[2].set_hover(ORANGE, WHITE)
+        self.components[2].set_hover(COLOR.ORANGE_DARK, COLOR.WHITE)
         self.components[3].set_click(self.func_click_btn_send)
-        self.components[3].set_hover(GREEN, BLUE)
+        self.components[3].set_hover(COLOR.GREEN_DARK, COLOR.BLUE_DARK)
         self.components[4].set_click(self.func_back)
         self.components[6].set_keydown(self.func_keydown)
         self.components[7].set_click(self.func_click_sound)
@@ -288,7 +283,7 @@ class Game_complete(Page):
 
 class Menu_complete(Page):
     def __init__(self, screen, func):
-        super().__init__(screen, "MENU DE OPÇÕES - ALFA", BG_COLOR, func)
+        super().__init__(screen, "MENU DE OPÇÕES - ALFA", COLOR.WHITE, func)
 
         # [7, 10, 22, 24] =~ [H, K, Y, W]
         self.options = [65 + i for i in range(25) if i not in [7, 10, 22, 24]]
@@ -311,9 +306,9 @@ class Menu_complete(Page):
             self.func(game)
 
     def init(self):
-        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, BLUE))
+        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, COLOR.BLUE_DARK))
         self.components[-1].init()
-        self.components[-1].set_margins(((WIDTH - self.components[-1].size[0])/ 2, 50))
+        self.components[-1].set_margins(((PARAMS.WIDTH - self.components[-1].size[0])/ 2, 50))
 
         for l in range(self.grid[0]):
             for c in range(self.grid[1]):
@@ -321,19 +316,19 @@ class Menu_complete(Page):
                     char = chr(self.options[c + self.grid[1] * l])
                     self.components.append(Button(
                                   self.screen,
-                                  label=char, color_label=BLUE,
-                                  size_box=(70,70), color_box=GREEN_LIGHT,
-                                  margin_box=((WIDTH - self.gap)/2 + 100 * c, 200 + 100 * l)
+                                  label=char, color_label=COLOR.BLUE_DARK,
+                                  size_box=(70,70), color_box=COLOR.GREEN,
+                                  margin_box=((PARAMS.WIDTH - self.gap)/2 + 100 * c, 200 + 100 * l)
                             ))
                     self.components[-1].init()
-                    self.components[-1].set_hover(ORANGE_LIGHT, WHITE)
+                    self.components[-1].set_hover(COLOR.ORANGE, COLOR.WHITE)
                     self.components[-1].set_click(self.func_generic(char))
 
         self.components[-1].set_keydown(self.func_keydown)
 
 class Rank_complete(Page):
     def __init__(self,screen, func, score: int, stage: str):
-        super().__init__(screen, "FIM DE JOGO - ALFA", BG_COLOR, func)
+        super().__init__(screen, "FIM DE JOGO - ALFA", COLOR.WHITE, func)
         self.score = score
         self.stage = stage
 
@@ -342,25 +337,25 @@ class Rank_complete(Page):
 
     def init(self):
         self.components.append(Image(self.screen, 'medal.png', (250, 250)))
-        self.components.append(Text(self.screen, f'JOGO - {self.stage.upper()}', 'Noto Mono', 24, BLUE))
-        self.components.append(Text(self.screen, f'{self.score} PONTOS', 'Noto Mono', 50, ORANGE_LIGHT))
-        self.components.append(Text(self.screen, 'PRESSIONE QUALQUER TECLA PARA CONTINUAR', 'Noto Mono', 24, BLUE))
+        self.components.append(Text(self.screen, f'JOGO - {self.stage.upper()}', 'Noto Mono', 24, COLOR.BLUE))
+        self.components.append(Text(self.screen, f'{self.score} PONTOS', 'Noto Mono', 50, COLOR.ORANGE_LIGHT))
+        self.components.append(Text(self.screen, 'PRESSIONE QUALQUER TECLA PARA CONTINUAR', 'Noto Mono', 24, COLOR.BLUE))
         for component in self.components:
             component.init()
         self.components[0].set_margins((
-            (WIDTH - self.components[0].size[0])/2,
+            (PARAMS.WIDTH - self.components[0].size[0])/2,
             120
         ))
         self.components[1].set_margins((
-            (WIDTH - self.components[1].size[0]) / 2,
+            (PARAMS.WIDTH - self.components[1].size[0]) / 2,
             self.components[0].margins[1] + self.components[0].size[1] + 30
         ))
         self.components[2].set_margins((
-            (WIDTH - self.components[2].size[0]) / 2,
+            (PARAMS.WIDTH - self.components[2].size[0]) / 2,
             self.components[1].margins[1] + self.components[1].size[1] + 10
         ))
         self.components[3].set_margins((
-            (WIDTH - self.components[3].size[0]) / 2,
+            (PARAMS.WIDTH - self.components[3].size[0]) / 2,
             self.components[2].margins[1] + self.components[2].size[1] + 30
         ))
         self.components[3].set_blink()

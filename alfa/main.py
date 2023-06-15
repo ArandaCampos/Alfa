@@ -1,7 +1,7 @@
-import os
+import os, time
 from complete import Game_complete, Menu_complete
-from items import Button, Text, Page
-#from animations import Blink
+from items import Button, Text, Page, Image
+from constants import Colors, Params
 
 try:
     import pygame
@@ -9,40 +9,61 @@ except ImportError:
     print('Erro ao importar o Pygame. Verifique se o ambiente virtual está habilitado ou o pacote instalado')
     raise SystemExit
 
-BG_COLOR, BLUE = (222, 239, 231, 240), (1, 32, 48, 255)
-ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 255), (154, 235, 163, 255)
-HEIGHT, WIDTH = 648, 1000
+COLOR = Colors()
+PARAMS = Params()
+
+class Goodbye(Page):
+    def __init__(self, screen, func):
+
+        super().__init__(screen, "ATÉ MAIS - ALFA", COLOR.WHITE, func)
+
+    def init(self):
+
+        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, COLOR.ORANGE))
+        self.components.append(Text(self.screen, 'OBRIGADO POR JOGAR', 'Noto Mono', 20, COLOR.BLUE_DARK))
+        self.components.append(Image(self.screen, 'heart.png', (22, 22)))
+        for component in self.components:
+            component.init()
+        self.components[0].set_margins(((PARAMS.WIDTH - self.components[0].size[0])/ 2, (PARAMS.HEIGHT - self.components[0].size[1])/ 2))
+        self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0] - 27) /2 , PARAMS.HEIGHT - 75 - 100))
+        self.components[2].set_margins((self.components[1].size[0] + self.components[1].margins[0] + 5 , PARAMS.HEIGHT - 75 - 100))
 
 class Home(Page):
     def __init__(self, screen, func):
 
-        super().__init__(screen, "PÁGINA INICIAL - ALFA", BG_COLOR, func)
+        super().__init__(screen, "PÁGINA INICIAL - ALFA", COLOR.WHITE, func)
+
+    def func_wait_for(self):
+        self.components[1].text = 'PRESSIONE QUALQUER TECLA PARA CONTINUAR'
+        self.components[1].init()
+        self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0]) /2 , PARAMS.HEIGHT - 75 - 100))
+        # Configurar eventos e animações
+        self.components[1].set_blink()
+        self.components[1].set_hover(COLOR.BLUE)
+        self.components[1].set_click(self.func_to_menu)
+        self.components[1].set_keydown(self.func_to_menu)
 
     def func_to_menu(self, event = None):
         self.func(Menu_complete(self.screen, self.func))
 
     def init(self):
-        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, ORANGE_LIGHT))
-        self.components.append(Text(self.screen, 'PRESSIONE QUALQUER TECLA PARA CONTINUAR', 'Noto Mono', 24, BLUE))
+        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, COLOR.ORANGE))
+        self.components.append(Text(self.screen, 'SEJA BEM-VINDO(A)', 'Noto Mono', 20, COLOR.BLUE_DARK))
         for component in self.components:
             component.init()
-        # configurar margins
-        self.components[0].set_margins(((WIDTH - self.components[0].size[0])/ 2, (HEIGHT - self.components[0].size[1])/ 2))
-        self.components[1].set_margins(((WIDTH - self.components[1].size[0]) /2 , HEIGHT - 75 - 100))
+        self.components[0].set_margins(((PARAMS.WIDTH - self.components[0].size[0])/ 2, (PARAMS.HEIGHT - self.components[0].size[1])/ 2))
+        self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0]) /2 , PARAMS.HEIGHT - 75 - 100))
         # configurar eventos e animações
-        self.components[1].set_blink()
-        self.components[1].set_hover(ORANGE_LIGHT)
-        self.components[1].set_click(self.func_to_menu)
-        self.components[1].set_keydown(self.func_to_menu)
+        self.components[0].set_wait(2*PARAMS.FPS, self.func_wait_for)
 
 class Window():
     def __init__(self):
 
         # Parâmetros da tela
         self.screen = None
-        self.size = (1000, 648)
+        self.size = (PARAMS.WIDTH, PARAMS.HEIGHT)
         # Páginas
-        self.page = Home(self.screen, self.change_page)
+        self.page = None
         # Parâmetros do jogo
         self.play = True
 
@@ -62,6 +83,10 @@ class Window():
         for event in pygame.event.get():
             self.page.get_event(event)
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                self.page = Goodbye(self.screen, self.change_page)
+                self.page.init()
+                self.page.refresh_screen()
+                time.sleep(2)
                 self.play = False
 
     def exit(self):
@@ -71,7 +96,7 @@ def run(window):
     clock = pygame.time.Clock()
 
     while window.play:
-        clock.tick(40)
+        clock.tick(PARAMS.FPS)
 
         window.refresh_screen()
         window.get_event()

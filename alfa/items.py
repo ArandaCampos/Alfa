@@ -1,11 +1,13 @@
 import pygame
 import os, pandas as pd
-from animations import Blink
+from animations import Blink, Wait
+from constants import Colors
 
 # Paleta de cores
 HEIGHT, WIDTH = 648, 1000
-BG_COLOR, BLUE, WHITE = (222, 239, 231, 240), (1, 32, 48, 255), (240, 240, 242, 242)
-ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 255), (154, 235, 163, 255)
+#BG_COLOR, BLUE, WHITE = (222, 239, 231, 240), (1, 32, 48, 255), (240, 240, 242, 242)
+#ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 255), (154, 235, 163, 255)
+COLOR = Colors()
 
 # Carregar diretório "Images"
 ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -13,7 +15,7 @@ DATA_PATH = os.path.join(ABS_PATH, 'data')
 IMG_PATH = os.path.join(DATA_PATH, 'Images')
 
 class Page():
-    def __init__ (self, screen, caption, bg_color: (int, int, int) = BG_COLOR, func = None):
+    def __init__ (self, screen, caption, bg_color: (int, int, int) = COLOR.WHITE, func = None):
 
         self.screen = screen
         # Estilização
@@ -83,15 +85,16 @@ class Component():
             self.color = self.colors[1] if self.rendered.collidepoint(pos) else self.colors[0]
         if self.click:
             if event.type == pygame.MOUSEBUTTONUP and self.rendered.collidepoint(pos):
-                print('clicou em mim')
                 self.click()
         if self.keydown:
             if event.type == pygame.KEYDOWN:
                 self.keydown(event)
 
     def set_blink(self, velocity: int = 12):
-        blink = Blink(velocity)
-        self.animations.append(blink)
+        self.animations.append(Blink(velocity))
+
+    def set_wait(self, time: int, func):
+        self.animations.append(Wait(time, func))
 
     def play(self):
         for animation in self.animations:
@@ -131,7 +134,7 @@ class Text(Component):
         # Estilização
         self.family = family
         self.font_size = size_font
-        self.color = pygame.Color(color)
+        self.color = color
         self.font = None
         self.bold = bold
 
@@ -160,7 +163,7 @@ class Text(Component):
         #self.play()
 
 class Box(Component):
-    def __init__(self, screen, size, margins = (0, 0), color = ORANGE_LIGHT, border_radius = 8):
+    def __init__(self, screen, size, margins = (0, 0), color = COLOR.ORANGE, border_radius = 8):
         super().__init__(screen, size, margins)
 
         # Estilização
@@ -181,11 +184,11 @@ class Button(Component):
     def __init__(self,
                  screen,
                  label: str = None,
-                 color_label: (int, int, int) = WHITE,
+                 color_label: (int, int, int) = COLOR.WHITE,
                  size_label: int = 20,
                  size_box: (int, int) = (220, 75),
                  margin_box: (int, int) = (0,0),
-                 color_box: (int, int, int) = ORANGE_LIGHT,
+                 color_box: (int, int, int) = COLOR.ORANGE,
                  border_radius: int = 8,
                  src: str = None,
                  size_img: (int, int) =  (20, 20)
@@ -260,3 +263,4 @@ class Button(Component):
         self.box.draw()
         self.label.draw() if self.label else None
         self.image.draw() if self.image else None
+        self.play()
