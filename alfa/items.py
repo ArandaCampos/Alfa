@@ -1,18 +1,10 @@
 import pygame
 import os, pandas as pd
 from animations import Blink, Wait
-from constants import Colors
+from constants import Colors, Params
 
-# Paleta de cores
-HEIGHT, WIDTH = 648, 1000
-#BG_COLOR, BLUE, WHITE = (222, 239, 231, 240), (1, 32, 48, 255), (240, 240, 242, 242)
-#ORANGE_LIGHT, GREEN_LIGHT = (242, 68, 5, 255), (154, 235, 163, 255)
-COLOR = Colors()
-
-# Carregar diretório "Images"
-ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-DATA_PATH = os.path.join(ABS_PATH, 'data')
-IMG_PATH = os.path.join(DATA_PATH, 'Images')
+# Constantes
+COLOR, PARAMS = Colors(), Params()
 
 class Page():
     def __init__ (self, screen, caption, bg_color: (int, int, int) = COLOR.WHITE, func = None):
@@ -49,8 +41,7 @@ class Component():
         # Estilização
         self.size = size
         self.color = None
-        self.secondary_color = None
-        self.main_color = None
+        self.colors = None
         # Posicionamento
         self.margins = margins
         # Renderizado
@@ -78,6 +69,15 @@ class Component():
 
     def set_keydown(self, func):
         self.keydown = func
+
+    def set_margins_center(self):
+        self.margins = ((PARAMS.WIDTH - self.size[0]) /2, (PARAMS.HEIGHT - self.size[1]) /2)
+
+    def get_right(self):
+        return self.margins[0] + self.size[0]
+
+    def get_bottom(self):
+        return self.margins[1] + self.size[1]
 
     def events(self, event: pygame.event):
         pos = pygame.mouse.get_pos()
@@ -119,7 +119,7 @@ class Image(Component):
         return self.rendered.get_rect(center=self.get_center())
 
     def render(self):
-        self.surface = pygame.image.load(os.path.join(IMG_PATH, self.file)).convert_alpha()
+        self.surface = pygame.image.load(os.path.join(PARAMS.IMG_PATH, self.file)).convert_alpha()
         self.surface = pygame.transform.scale(self.surface, self.size)
 
     def draw(self):

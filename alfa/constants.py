@@ -25,6 +25,7 @@ class Params():
         self.ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
         self.DATA_PATH = os.path.join(self.ABS_PATH, 'data')
         self.AUD_PATH = os.path.join(self.DATA_PATH, 'Audio')
+        self.IMG_PATH = os.path.join(self.DATA_PATH, 'Images')
         # Áudio carregados
         self.SOUND_WIN = pygame.mixer.Sound(os.path.join(self.AUD_PATH, 'win.wav'))
         self.SOUND_FAIL = pygame.mixer.Sound(os.path.join(self.AUD_PATH, 'failed.wav'))

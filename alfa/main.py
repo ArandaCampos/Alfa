@@ -24,7 +24,7 @@ class Goodbye(Page):
         self.components.append(Image(self.screen, 'heart.png', (22, 22)))
         for component in self.components:
             component.init()
-        self.components[0].set_margins(((PARAMS.WIDTH - self.components[0].size[0])/ 2, (PARAMS.HEIGHT - self.components[0].size[1])/ 2))
+        self.components[0].set_margins_center()
         self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0] - 27) /2 , PARAMS.HEIGHT - 75 - 100))
         self.components[2].set_margins((self.components[1].size[0] + self.components[1].margins[0] + 5 , PARAMS.HEIGHT - 75 - 100))
 
@@ -51,7 +51,7 @@ class Home(Page):
         self.components.append(Text(self.screen, 'SEJA BEM-VINDO(A)', 'Noto Mono', 20, COLOR.BLUE_DARK))
         for component in self.components:
             component.init()
-        self.components[0].set_margins(((PARAMS.WIDTH - self.components[0].size[0])/ 2, (PARAMS.HEIGHT - self.components[0].size[1])/ 2))
+        self.components[0].set_margins_center()
         self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0]) /2 , PARAMS.HEIGHT - 75 - 100))
         # configurar eventos e animações
         self.components[0].set_wait(2*PARAMS.FPS, self.func_wait_for)

@@ -58,26 +58,26 @@ class Toggle_letter(Component):
         self.key     = self.letters.index("")
         self.answer = word.replace('*', answer)
         self.components = []
+        self.size = [0,0]
 
     def init(self):
         self.letters[self.key] = self.options[0]
         self.render()
 
-    def new_game(self, word, options, answer):
+    def next_round(self, word, answer):
         self.letters = word.upper().split("*")
-        self.options = list(options)
         self.key     = self.letters.index("")
         self.answer = word.replace('*', answer)
         self.size = [0,0]
-        self.margins = []
+        self.margins = [0,0]
+        self.init()
 
     def toggle_value(self, value: int = None, increment: bool = False, decrement: bool = False, letter: str = False):
         if letter:
-            if len(self.options[0]) == 1:
-                self.letters[self.key] = self.options.index(letter.upper()) if letter.upper() in self.options else self.letters[self.key]
-            else:
-                for option in self.options:
-                    self.letters[self.key] = option if letter.upper() == option[1] else self.letters[self.key]
+            for i, option in enumerate(self.options):
+                if letter.upper() in option:
+                    self.letters[self.key] = self.options[i]
+                    break
         else:
             index = self.options.index(self.letters[self.key])
             if increment:
@@ -96,10 +96,10 @@ class Toggle_letter(Component):
         self.margins = ((PARAMS.WIDTH - self.size[0])/2, 390)
         self.components[0].set_margins(self.margins)
         for i in range(1, len(self.letters)):
-            self.components[i].set_margins((
-                self.components[i-1].margins[0] + self.components[i-1].size[0],
-                390 + (self.components[0].size[1] - self.components[i].size[1])
-            ))
+            self.components[i].set_margins((self.components[i-1].get_right(), 390 + (self.components[0].size[1] - self.components[i].size[1])))
+
+    def get_right(self):
+        return self.components[-1].get_right()
 
     def response(self):
         return self.get_word() == self.answer.lower()
@@ -112,7 +112,6 @@ class Toggle_letter(Component):
             components.draw()
 
 class Game_complete(Page):
-    pygame.init()
     def __init__(self, screen, func):
         super().__init__(screen, "COMPLETAR - ALFA", COLOR.WHITE, func)
         self.name = 'Game'
@@ -199,7 +198,7 @@ class Game_complete(Page):
         # Marigins relativas
         self.components[1].set_margins((PARAMS.WIDTH - 42 - 25 - self.components[1].size[0] - 10, 25 + (42 - self.components[1].size[1])/2))
         self.components[7].set_margins((
-            self.components[6].margins[0] + self.components[6].size[0] + 60,
+            self.components[6].get_right() + 60,
             self.components[6].margins[1] + (self.components[6].size[1] - self.components[-1].size[1]) / 2
         ))
         # Eventos
@@ -241,11 +240,10 @@ class Game_complete(Page):
             # Próxima rodada
             self.round += 1
             self.components[5].file = self.df["file"][self.round]
-            self.components[5].render()
-            self.components[6].new_game(self.df["word"][self.round], self.option, self.df["answer"][self.round])
-            self.components[6].init()
+            self.components[5].init()
+            self.components[6].next_round(self.df["word"][self.round], self.df["answer"][self.round])
             self.components[7].margins = [
-                self.components[6].margins[0] + self.components[6].size[0] + 60,
+                self.components[6].get_right() + 60,
                 self.components[6].margins[1] + (self.components[6].size[1] - self.components[-1].size[1]) / 2
             ]
 
@@ -305,26 +303,17 @@ class Rank_complete(Page):
 
     def init(self):
         self.components.append(Image(self.screen, 'medal.png', (250, 250)))
-        self.components.append(Text(self.screen, f'JOGO - {self.stage.upper()}', 'Noto Mono', 24, COLOR.BLUE))
-        self.components.append(Text(self.screen, f'{self.score} PONTOS', 'Noto Mono', 50, COLOR.ORANGE_LIGHT))
-        self.components.append(Text(self.screen, 'PRESSIONE QUALQUER TECLA PARA CONTINUAR', 'Noto Mono', 24, COLOR.BLUE))
+        self.components.append(Text(self.screen, f'JOGO - {self.stage.upper()}', 'Noto Mono', 24, COLOR.BLUE_DARK))
+        self.components.append(Text(self.screen, f'{self.score} PONTOS', 'Noto Mono', 50, COLOR.ORANGE_DARK))
+        self.components.append(Text(self.screen, 'PRESSIONE QUALQUER TECLA PARA CONTINUAR', 'Noto Mono', 24, COLOR.BLUE_DARK))
         for component in self.components:
             component.init()
         self.components[0].set_margins((
             (PARAMS.WIDTH - self.components[0].size[0])/2,
             120
         ))
-        self.components[1].set_margins((
-            (PARAMS.WIDTH - self.components[1].size[0]) / 2,
-            self.components[0].margins[1] + self.components[0].size[1] + 30
-        ))
-        self.components[2].set_margins((
-            (PARAMS.WIDTH - self.components[2].size[0]) / 2,
-            self.components[1].margins[1] + self.components[1].size[1] + 10
-        ))
-        self.components[3].set_margins((
-            (PARAMS.WIDTH - self.components[3].size[0]) / 2,
-            self.components[2].margins[1] + self.components[2].size[1] + 30
-        ))
+        self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0]) / 2, self.components[0].get_bottom() + 30))
+        self.components[2].set_margins(((PARAMS.WIDTH - self.components[2].size[0]) / 2, self.components[1].get_bottom() + 10))
+        self.components[3].set_margins(((PARAMS.WIDTH - self.components[3].size[0]) / 2, self.components[2].get_bottom() + 30))
         self.components[3].set_blink()
         self.components[3].set_keydown(self.func_to_menu)
