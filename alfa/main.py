@@ -19,8 +19,8 @@ class Goodbye(Page):
 
     def init(self):
 
-        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, COLOR.ORANGE))
-        self.components.append(Text(self.screen, 'OBRIGADO POR JOGAR', 'Noto Mono', 20, COLOR.BLUE_DARK))
+        self.components.append(Text(self.screen, 'ALFA', 90, COLOR.ORANGE))
+        self.components.append(Text(self.screen, 'OBRIGADO POR JOGAR', 20, COLOR.BLUE_DARK))
         self.components.append(Image(self.screen, 'heart.png', (22, 22)))
         for component in self.components:
             component.init()
@@ -35,7 +35,7 @@ class Home(Page):
 
     def func_wait_for(self):
         self.components[1].text = 'PRESSIONE QUALQUER TECLA PARA CONTINUAR'
-        self.components[1].init()
+        self.components[1].render()
         self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0]) /2 , PARAMS.HEIGHT - 75 - 100))
         # Configurar eventos e animações
         self.components[1].set_blink()
@@ -47,8 +47,8 @@ class Home(Page):
         self.func(Menu_complete(self.screen, self.func))
 
     def init(self):
-        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, COLOR.ORANGE))
-        self.components.append(Text(self.screen, 'SEJA BEM-VINDO(A)', 'Noto Mono', 20, COLOR.BLUE_DARK))
+        self.components.append(Text(self.screen, 'ALFA', 90, COLOR.ORANGE))
+        self.components.append(Text(self.screen, 'SEJA BEM-VINDO(A)', 20, COLOR.BLUE_DARK))
         for component in self.components:
             component.init()
         self.components[0].set_margins_center()

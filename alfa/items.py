@@ -127,19 +127,21 @@ class Image(Component):
         self.play()
 
 class Text(Component):
-    def __init__(self, screen, txt: str, family: str, size_font: int, color: [int, int, int, float], bold: bool = False, size:int=0, margins=(0,0)):
+    def __init__(self, screen, txt: str, size_font: int, color: [int, int, int, float], bold: bool = False, size:int=0, margins=(0,0)):
         super().__init__(screen, size, margins)
 
         self.text = txt
         # Estilização
-        self.family = family
-        self.font_size = size_font
+        self.size = size_font
         self.color = color
         self.font = None
         self.bold = bold
 
     def init(self):
-        self.font = pygame.font.SysFont(self.family, self.font_size, bold=self.bold)
+        if self.bold:
+            self.font = pygame.font.Font(os.path.join(PARAMS.FONT_PATH, "Inconsolata-Bold.ttf"), self.size)
+        else:
+            self.font = pygame.font.Font(os.path.join(PARAMS.FONT_PATH, "Inconsolata-Regular.ttf"), self.size)
         self.render()
 
     def get_center(self) -> [int, int]:
@@ -197,7 +199,7 @@ class Button(Component):
 
         self.box = Box(screen, size_box, margin_box, color=color_box, border_radius=border_radius)
         self.color_box = color_box
-        self.label = Text(screen, label, 'Noto Mono', size_label, color_label) if label else None
+        self.label = Text(screen, label, size_label, color_label) if label else None
         self.color_label = color_label
         self.image = Image(screen, src, (20,20)) if src else None
 

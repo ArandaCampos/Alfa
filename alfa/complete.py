@@ -32,12 +32,6 @@ except ImportError:
     print("Erro ao importar a biblioteca gTTS. Tente $ pip install gTTs")
     raise SystemExit
 
-try:
-    from playsound import playsound
-except ImportError:
-    print("Erro ao importar a biblioteca Playsound. Tente $ pip install playsound")
-    raise SystemExit
-
 # Constantes
 COLOR = Colors()
 PARAMS = Params()
@@ -46,7 +40,8 @@ def to_read(word: str):
     # Lê o texto escrito pelo usuário
     tts = gTTS(word, lang='pt', tld="com.br")
     tts.save("audio.mp3")
-    playsound("audio.mp3")
+    sound = pygame.mixer.Sound('audio.mp3')
+    sound.play()
 
 class Toggle_letter(Component):
     def __init__ (self, screen, word: str, options: (str), answer: (str), size: int =  [0,0], margins: (int, int) = [0,0]):
@@ -89,7 +84,7 @@ class Toggle_letter(Component):
     def render(self):
         self.components = []
         for i, letter in enumerate(self.letters):
-            self.components.append(Text(self.screen, letter, 'Noto Mono', 80, COLOR.ORANGE if i == self.key else COLOR.BLUE_DARK))
+            self.components.append(Text(self.screen, letter, 80, COLOR.ORANGE if i == self.key else COLOR.BLUE_DARK))
             self.components[-1].init()
             self.size[0] += self.components[-1].size[0]
             self.size[1] = self.components[-1].size[1] if self.components[-1].size[1] > self.size[1] else self.size[1]
@@ -181,7 +176,7 @@ class Game_complete(Page):
         self.round, self.play = 0, 1
         self.load_data()
         self.components.append(Image(self.screen, 'medal.png', (42, 42), (PARAMS.WIDTH - 42 - 25, 25)))
-        self.components.append(Text(self.screen, '0', 'Noto Mono', 28, COLOR.BLUE_DARK))
+        self.components.append(Text(self.screen, '0', 28, COLOR.BLUE_DARK))
         self.components.append(Button(self.screen, label="NÃO SEI", margin_box=(120, PARAMS.HEIGHT - 110), src="cancel.png"))
         self.components.append(Button(self.screen,
                                       label="ENVIAR",
@@ -272,7 +267,7 @@ class Menu_complete(Page):
             self.func(game)
 
     def init(self):
-        self.components.append(Text(self.screen, 'ALFA', 'Noto Mono', 90, COLOR.BLUE_DARK))
+        self.components.append(Text(self.screen, 'ALFA', 90, COLOR.BLUE_DARK))
         self.components[-1].init()
         self.components[-1].set_margins(((PARAMS.WIDTH - self.components[-1].size[0])/ 2, 50))
 
@@ -303,9 +298,9 @@ class Rank_complete(Page):
 
     def init(self):
         self.components.append(Image(self.screen, 'medal.png', (250, 250)))
-        self.components.append(Text(self.screen, f'JOGO - {self.stage.upper()}', 'Noto Mono', 24, COLOR.BLUE_DARK))
-        self.components.append(Text(self.screen, f'{self.score} PONTOS', 'Noto Mono', 50, COLOR.ORANGE_DARK))
-        self.components.append(Text(self.screen, 'PRESSIONE QUALQUER TECLA PARA CONTINUAR', 'Noto Mono', 24, COLOR.BLUE_DARK))
+        self.components.append(Text(self.screen, f'JOGO - {self.stage.upper()}', 24, COLOR.BLUE_DARK))
+        self.components.append(Text(self.screen, f'{self.score} PONTOS', 50, COLOR.ORANGE_DARK))
+        self.components.append(Text(self.screen, 'PRESSIONE QUALQUER TECLA PARA CONTINUAR', 24, COLOR.BLUE_DARK))
         for component in self.components:
             component.init()
         self.components[0].set_margins((
