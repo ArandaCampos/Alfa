@@ -5,6 +5,7 @@
 
 import os
 from items import Text, Button, Image, Page, Component
+from pages import Rank, Menu
 from constants import Colors, Params
 
 try:
@@ -155,11 +156,11 @@ class Game_complete(Page):
     def func_click_sound(self, event=None):
         to_read(self.components[6].get_word())
 
-    def func_click_btn_send(self, event=None):
-        self.get_result()
-
-    def func_click_btn_cancel(self, event=None):
-        self.get_result(cancel=False)
+    def func_click(self, cancel: bool = False):
+        def click():
+            nonlocal cancel
+            self.get_result(cancel)
+        return click
 
     def func_keydown(self, event):
         if event.key == pygame.K_UP:
@@ -203,7 +204,7 @@ class Game_complete(Page):
         self.components.append(Image(self.screen, self.df["file"][self.round], (250, 250), ((PARAMS.WIDTH - 250) / 2, 50)))
         self.components.append(Toggle_letter(self.screen, self.df["word"][self.round], self.option, self.df["answer"][self.round]))
         self.components.append(Image(self.screen, 'sound.png', (31.4, 30)))
-        self.components.append(Text(self.screen, 'PRESSIONE ENTER', 28, COLOR.BLUE_DARK))
+        self.components.append(Text(self.screen, 'PRESSIONE ENTER', 20, COLOR.BLUE_DARK))
         for component in self.components:
             component.init()
         # Marigins relativas
@@ -214,13 +215,14 @@ class Game_complete(Page):
         ))
         self.components[8].set_margins(((PARAMS.WIDTH - self.components[8].size[0])/2, PARAMS.HEIGHT - 110))
         # Eventos
-        self.components[2].set_click(self.func_click_btn_cancel)
+        self.components[2].set_click(self.func_click(cancel=True))
         self.components[2].set_hover(COLOR.ORANGE_DARK, COLOR.WHITE)
-        self.components[3].set_click(self.func_click_btn_send)
+        self.components[3].set_click(self.func_click())
         self.components[3].set_hover(COLOR.GREEN_DARK, COLOR.BLUE_DARK)
         self.components[4].set_click(self.func_back)
         self.components[6].set_keydown(self.func_keydown)
         self.components[7].set_click(self.func_click_sound)
+        #self.components[8].set_keydown(self.func_to_next)
         self.components[8].set_blink()
         self.components[8].able = False
 
@@ -249,7 +251,7 @@ class Game_complete(Page):
             rank.to_csv(f"data/rank_{self.stage}.csv", sep=" ", index=False)
 
             self.play = 0
-            self.func(Rank_complete(self.screen, self.func, self.components[1].text, self.stage))
+            self.func(Rank(self.screen, self.func, self.components[1].text, self.stage))
         else:
             # Próxima rodada
             self.round += 1
@@ -261,15 +263,20 @@ class Game_complete(Page):
                 self.components[6].margins[1] + (self.components[6].size[1] - self.components[-1].size[1]) / 2
             ]
 
-class Menu_complete(Page):
+class Menu_complete(Menu):
     def __init__(self, screen, func):
-        super().__init__(screen, "MENU DE OPÇÕES - ALFA", COLOR.WHITE, func)
-
-        # [7, 10, 22, 24] =~ [H, K, Y, W]
-        self.options = [65 + i for i in range(25) if i not in [7, 10, 22, 24]]
-        # Positionamento
-        self.grid = (4, 6)
-        self.gap = 70 * self.grid[1] + 30 * (self.grid[1] - 1)
+        super().__init__(
+            screen,
+            "MENU DE OPÇÕES - ALFA (MATEMÁTICA BÁSICA)",
+            func,
+            [chr(65 + i) for i in range(25) if i not in [7, 10, 22, 24]],
+            [chr(65 + i) for i in range(25) if i not in [7, 10, 22, 24]],
+            # Positionamento
+            (70, 70),
+            (6, 4),
+            (30, 30),
+        )
+        self.margin_menu[1] = 200
 
     def func_generic(self, letter):
         def func_click():
@@ -285,28 +292,7 @@ class Menu_complete(Page):
             game.set_stage(event.unicode.lower())
             self.func(game)
 
-    def init(self):
-        self.components.append(Text(self.screen, 'ALFA', 90, COLOR.BLUE_DARK))
-        self.components[-1].init()
-        self.components[-1].set_margins(((PARAMS.WIDTH - self.components[-1].size[0])/ 2, 50))
-
-        for l in range(self.grid[0]):
-            for c in range(self.grid[1]):
-                if c + self.grid[1] * l in range(len(self.options)):
-                    char = chr(self.options[c + self.grid[1] * l])
-                    self.components.append(Button(
-                                  self.screen,
-                                  label=char, color_label=COLOR.BLUE_DARK,
-                                  size_box=(70,70), color_box=COLOR.GREEN,
-                                  margin_box=((PARAMS.WIDTH - self.gap)/2 + 100 * c, 200 + 100 * l)
-                            ))
-                    self.components[-1].init()
-                    self.components[-1].set_hover(COLOR.ORANGE, COLOR.WHITE)
-                    self.components[-1].set_click(self.func_generic(char))
-
-        self.components[-1].set_keydown(self.func_keydown)
-
-class Rank_complete(Page):
+class Rank(Page):
     def __init__(self,screen, func, score: int, stage: str):
         super().__init__(screen, "FIM DE JOGO - ALFA", COLOR.WHITE, func)
         self.score = score

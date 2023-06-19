@@ -49,12 +49,16 @@ class Home(Page):
     def init(self):
         self.components.append(Text(self.screen, 'ALFA', 90, COLOR.ORANGE))
         self.components.append(Text(self.screen, 'SEJA BEM-VINDO(A)', 20, COLOR.BLUE_DARK))
+        #self.components.append(Button(self.screen, label="ALFABETIZAÇÃO", margin_box=(120, PARAMS.HEIGHT - 110)))
+        #self.components.append(Button(self.screen, label="MATEMÁTICA", margin_box=(120, PARAMS.HEIGHT - 110)))
         for component in self.components:
             component.init()
         self.components[0].set_margins_center()
         self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0]) /2 , PARAMS.HEIGHT - 75 - 100))
         # configurar eventos e animações
         self.components[0].set_wait(2*PARAMS.FPS, self.func_wait_for)
+        #self.components[2].able = False
+        #self.components[3].able = False
 
 class Window():
     def __init__(self):

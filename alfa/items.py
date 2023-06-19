@@ -13,6 +13,7 @@ class Page():
         # Estilização
         self.caption = caption
         self.bg_color = bg_color
+        pygame.display.set_caption(self.caption)
         # Componentes
         self.components = []
         # Função herdada
