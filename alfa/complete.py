@@ -3,9 +3,8 @@
 #   Github: github.com/ArandaCampos
 # --------------------------------------------
 
-import os, time
+import os
 from items import Text, Button, Image, Page, Component
-from games import Hangman
 from constants import Colors, Params
 
 try:
@@ -51,9 +50,12 @@ class Toggle_letter(Component):
         self.letters = word.upper().split("*")
         self.options = list(options)
         self.key     = self.letters.index("")
-        self.answer = word.replace('*', answer)
+        self.answer = answer
         self.components = []
-        self.size = [0,0]
+        # Componentes
+        self.sound_win = PARAMS.SOUND_WIN
+        self.sound_fail = PARAMS.SOUND_FAIL
+
 
     def init(self):
         self.letters[self.key] = self.options[0]
@@ -62,7 +64,7 @@ class Toggle_letter(Component):
     def next_round(self, word, answer):
         self.letters = word.upper().split("*")
         self.key     = self.letters.index("")
-        self.answer = word.replace('*', answer)
+        self.answer = answer
         self.size = [0,0]
         self.margins = [0,0]
         self.init()
@@ -96,8 +98,13 @@ class Toggle_letter(Component):
     def get_right(self):
         return self.components[-1].get_right()
 
-    def response(self):
-        return self.get_word() == self.answer.lower()
+    def response(self, cancel: bool = False):
+        response = self.letters[self.key] == self.answer
+        self.components[self.key].text = self.answer
+        self.letters[self.key] = self.answer
+        for component in self.components:
+            component.color = COLOR.GREEN_DARK
+        return response
 
     def get_word(self):
         return "".join(self.letters).lower()
@@ -109,7 +116,6 @@ class Toggle_letter(Component):
 class Game_complete(Page):
     def __init__(self, screen, func):
         super().__init__(screen, "COMPLETAR - ALFA", COLOR.WHITE, func)
-        self.name = 'Game'
         # Componentes
         self.sound_win = PARAMS.SOUND_WIN
         self.sound_fail = PARAMS.SOUND_FAIL
@@ -121,25 +127,39 @@ class Game_complete(Page):
         self.round = 0
         self.option = None
 
+    def wait(self):
+        self.components[2].able = False
+        self.components[3].able = False
+        self.components[8].able = True
+        self.components[6].set_keydown(self.func_to_next)
+
+    def get_result(self, cancel: bool = False):
+        result = self.components[6].response()
+        if cancel or not result:
+            self.sound_fail.play()
+        else:
+            self.sound_win.play()
+            self.components[1].text = str(int(self.components[1].text) + 1)
+        self.wait()
+
+    def func_to_next(self, event = None):
+        self.components[6].set_keydown(self.func_keydown)
+        self.components[2].able = True
+        self.components[3].able = True
+        self.components[8].able = False
+        self.next_round()
+
     def func_back(self, event=None):
-        pos = pygame.mouse.get_pos()
         self.func(Menu_complete(self.screen, self.func))
 
     def func_click_sound(self, event=None):
-        pos = pygame.mouse.get_pos()
         to_read(self.components[6].get_word())
 
     def func_click_btn_send(self, event=None):
-        if self.components[6].response():
-            self.sound_win.play()
-            self.components[1].text = str(int(self.components[1].text) + 1)
-        else:
-            self.sound_fail.play()
-        self.next_round()
+        self.get_result()
 
     def func_click_btn_cancel(self, event=None):
-        self.sound_fail.play()
-        self.next_round()
+        self.get_result(cancel=False)
 
     def func_keydown(self, event):
         if event.key == pygame.K_UP:
@@ -151,12 +171,7 @@ class Game_complete(Page):
         elif event.key == pygame.K_LEFT:
             self.components[6].toggle_key(decrement=True)
         elif event.key == pygame.K_RETURN:
-            if self.components[6].response():
-                self.sound_win.play()
-                self.components[1].text = str(int(self.components[1].text) + 1)
-            else:
-                self.sound_fail.play()
-            self.next_round()
+            self.get_result()
         else:
             self.components[6].toggle_value(letter=event.unicode)
 
@@ -188,6 +203,7 @@ class Game_complete(Page):
         self.components.append(Image(self.screen, self.df["file"][self.round], (250, 250), ((PARAMS.WIDTH - 250) / 2, 50)))
         self.components.append(Toggle_letter(self.screen, self.df["word"][self.round], self.option, self.df["answer"][self.round]))
         self.components.append(Image(self.screen, 'sound.png', (31.4, 30)))
+        self.components.append(Text(self.screen, 'PRESSIONE ENTER', 28, COLOR.BLUE_DARK))
         for component in self.components:
             component.init()
         # Marigins relativas
@@ -196,6 +212,7 @@ class Game_complete(Page):
             self.components[6].get_right() + 60,
             self.components[6].margins[1] + (self.components[6].size[1] - self.components[-1].size[1]) / 2
         ))
+        self.components[8].set_margins(((PARAMS.WIDTH - self.components[8].size[0])/2, PARAMS.HEIGHT - 110))
         # Eventos
         self.components[2].set_click(self.func_click_btn_cancel)
         self.components[2].set_hover(COLOR.ORANGE_DARK, COLOR.WHITE)
@@ -204,6 +221,8 @@ class Game_complete(Page):
         self.components[4].set_click(self.func_back)
         self.components[6].set_keydown(self.func_keydown)
         self.components[7].set_click(self.func_click_sound)
+        self.components[8].set_blink()
+        self.components[8].able = False
 
     def set_stage(self, stage: str):
         self.stage = stage

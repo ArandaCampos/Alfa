@@ -6,7 +6,7 @@ from constants import Colors, Params
 try:
     import pygame
 except ImportError:
-    print('Erro ao importar o Pygame. Verifique se o ambiente virtual está habilitado ou o pacote instalado')
+    print('Erro ao importar o Pygame. Tente $ pip install pygame')
     raise SystemExit
 
 COLOR = Colors()

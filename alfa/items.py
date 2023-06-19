@@ -45,6 +45,7 @@ class Component():
         # Posicionamento
         self.margins = margins
         # Renderizado
+        self.able = True
         self.rendered = None
         self.surface =  None
         # Animação
@@ -80,15 +81,16 @@ class Component():
         return self.margins[1] + self.size[1]
 
     def events(self, event: pygame.event):
-        pos = pygame.mouse.get_pos()
-        if self.hover:
-            self.color = self.colors[1] if self.rendered.collidepoint(pos) else self.colors[0]
-        if self.click:
-            if event.type == pygame.MOUSEBUTTONUP and self.rendered.collidepoint(pos):
-                self.click()
-        if self.keydown:
-            if event.type == pygame.KEYDOWN:
-                self.keydown(event)
+        if self.able:
+            pos = pygame.mouse.get_pos()
+            if self.hover:
+                self.color = self.colors[1] if self.rendered.collidepoint(pos) else self.colors[0]
+            if self.click:
+                if event.type == pygame.MOUSEBUTTONUP and self.rendered.collidepoint(pos):
+                    self.click()
+            if self.keydown:
+                if event.type == pygame.KEYDOWN:
+                    self.keydown(event)
 
     def set_blink(self, velocity: int = 12):
         self.animations.append(Blink(velocity))
@@ -97,8 +99,9 @@ class Component():
         self.animations.append(Wait(time, func))
 
     def play(self):
-        for animation in self.animations:
-            animation.play(self.surface, self.rendered)
+        if self.able:
+            for animation in self.animations:
+                animation.play(self.surface, self.rendered)
 
 class Image(Component):
     def __init__(self, screen, file: str, size: (int, int), margins: (int, int) = None):
@@ -123,8 +126,9 @@ class Image(Component):
         self.surface = pygame.transform.scale(self.surface, self.size)
 
     def draw(self):
-        self.rendered = self.screen.blit(self.surface, self.margins)
-        self.play()
+        if self.able:
+            self.rendered = self.screen.blit(self.surface, self.margins)
+            self.play()
 
 class Text(Component):
     def __init__(self, screen, txt: str, size_font: int, color: [int, int, int, float], bold: bool = False, size:int=0, margins=(0,0)):
@@ -159,10 +163,10 @@ class Text(Component):
         self.size = (w, h)
 
     def draw(self):
-        self.surface = self.font.render('{}'.format(self.text), True, self.color)
-        self.play()
-        self.rendered = self.screen.blit(self.surface, self.margins)
-        #self.play()
+        if self.able:
+            self.surface = self.font.render('{}'.format(self.text), True, self.color)
+            self.play()
+            self.rendered = self.screen.blit(self.surface, self.margins)
 
 class Box(Component):
     def __init__(self, screen, size, margins = (0, 0), color = COLOR.ORANGE, border_radius = 8):
@@ -179,8 +183,9 @@ class Box(Component):
         return [self.margins[0] + self.size[0] /2, self.margins + self.size[1] /2]
 
     def draw(self):
-        self.surface = pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
-        self.play()
+        if self.able:
+            self.surface = pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
+            self.play()
 
 class Button(Component):
     def __init__(self,
@@ -244,25 +249,27 @@ class Button(Component):
         self.hover = True
 
     def events(self, event: pygame.event):
-        pos = pygame.mouse.get_pos()
-        if self.hover:
-            if self.box.rendered.collidepoint(pos):
-                self.box.color = self.box_colors[1]
-                if self.label:
-                    self.label.color = self.label_colors[1]
-            else:
-                self.box.color = self.box_colors[0]
-                if self.label:
-                    self.label.color = self.label_colors[0]
-        if self.click:
-            if event.type == pygame.MOUSEBUTTONUP and self.box.rendered.collidepoint(pos):
-                self.click()
-        if self.keydown:
-            if event.type == pygame.KEYDOWN:
-                self.keydown(event)
+        if self.able:
+            pos = pygame.mouse.get_pos()
+            if self.hover:
+                if self.box.rendered.collidepoint(pos):
+                    self.box.color = self.box_colors[1]
+                    if self.label:
+                        self.label.color = self.label_colors[1]
+                else:
+                    self.box.color = self.box_colors[0]
+                    if self.label:
+                        self.label.color = self.label_colors[0]
+            if self.click:
+                if event.type == pygame.MOUSEBUTTONUP and self.box.rendered.collidepoint(pos):
+                    self.click()
+            if self.keydown:
+                if event.type == pygame.KEYDOWN:
+                    self.keydown(event)
 
     def draw(self):
-        self.box.draw()
-        self.label.draw() if self.label else None
-        self.image.draw() if self.image else None
-        self.play()
+        if self.able:
+            self.box.draw()
+            self.label.draw() if self.label else None
+            self.image.draw() if self.image else None
+            self.play()
