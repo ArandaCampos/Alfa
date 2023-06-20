@@ -1,5 +1,6 @@
 import os, time
 from complete import Game_complete, Menu_complete
+from basics_math import Menu_math
 from items import Button, Text, Page, Image
 from constants import Colors, Params
 
@@ -38,27 +39,43 @@ class Home(Page):
         self.components[1].render()
         self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0]) /2 , PARAMS.HEIGHT - 75 - 100))
         # Configurar eventos e animações
+        #self.components[1].set_move(5 * PARAMS.FPS, x=10, y=10)
         self.components[1].set_blink()
         self.components[1].set_hover(COLOR.BLUE)
-        self.components[1].set_click(self.func_to_menu)
-        self.components[1].set_keydown(self.func_to_menu)
+        self.components[1].set_click(self.func_visible)
+        self.components[1].set_keydown(self.func_visible)
 
-    def func_to_menu(self, event = None):
-        self.func(Menu_complete(self.screen, self.func))
+    def visible_menu(self):
+        self.components[1].able = False
+        self.components[2].able = True
+        self.components[3].able = True
+
+    def go_to(self, page):
+        def func(event = None):
+            nonlocal page
+            self.func(page)
+        return func
+
+    def func_visible(self, event = None):
+        self.visible_menu()
 
     def init(self):
         self.components.append(Text(self.screen, 'ALFA', 90, COLOR.ORANGE))
         self.components.append(Text(self.screen, 'SEJA BEM-VINDO(A)', 20, COLOR.BLUE_DARK))
-        #self.components.append(Button(self.screen, label="ALFABETIZAÇÃO", margin_box=(120, PARAMS.HEIGHT - 110)))
-        #self.components.append(Button(self.screen, label="MATEMÁTICA", margin_box=(120, PARAMS.HEIGHT - 110)))
+        self.components.append(Button(self.screen, label="ALFABETIZAÇÃO", margin_box=(PARAMS.WIDTH / 2 - 250, PARAMS.HEIGHT - 210)))
+        self.components.append(Button(self.screen, label="MATEMÁTICA", margin_box=(PARAMS.WIDTH / 2 + 30, PARAMS.HEIGHT - 210)))
         for component in self.components:
             component.init()
         self.components[0].set_margins_center()
         self.components[1].set_margins(((PARAMS.WIDTH - self.components[1].size[0]) /2 , PARAMS.HEIGHT - 75 - 100))
         # configurar eventos e animações
         self.components[0].set_wait(2*PARAMS.FPS, self.func_wait_for)
-        #self.components[2].able = False
-        #self.components[3].able = False
+        self.components[2].set_click(self.go_to(Menu_complete(self.screen, self.func)))
+        self.components[3].set_click(self.go_to(Menu_math(self.screen, self.func)))
+        self.components[2].set_hover(COLOR.ORANGE, COLOR.WHITE)
+        self.components[3].set_hover(COLOR.ORANGE, COLOR.WHITE)
+        self.components[2].able = False
+        self.components[3].able = False
 
 class Window():
     def __init__(self):

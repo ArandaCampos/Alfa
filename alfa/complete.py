@@ -171,7 +171,7 @@ class Game_complete(Page):
             self.components[6].toggle_key(increment=True)
         elif event.key == pygame.K_LEFT:
             self.components[6].toggle_key(decrement=True)
-        elif event.key == pygame.K_RETURN:
+        elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
             self.get_result()
         else:
             self.components[6].toggle_value(letter=event.unicode)
@@ -193,13 +193,10 @@ class Game_complete(Page):
         self.load_data()
         self.components.append(Image(self.screen, 'medal.png', (42, 42), (PARAMS.WIDTH - 42 - 25, 25)))
         self.components.append(Text(self.screen, '0', 28, COLOR.BLUE_DARK))
-        self.components.append(Button(self.screen, label="NÃO SEI", margin_box=(120, PARAMS.HEIGHT - 110), src="cancel.png"))
         self.components.append(Button(self.screen,
-                                      label="ENVIAR",
-                                      color_label=COLOR.BLUE_DARK,
-                                      margin_box=(PARAMS.WIDTH - 120 - 220, PARAMS.HEIGHT - 110),
-                                      color_box=COLOR.GREEN, src="send.png"
-                                      ))
+                                      label="NÃO SEI", color_label=COLOR.WHITE, color_box=COLOR.ORANGE_DARK,
+                                      margin_box=(120, PARAMS.HEIGHT - 110), src="cancel.png"))
+        self.components.append(Button(self.screen, label="ENVIAR", margin_box=(PARAMS.WIDTH - 120 - 220, PARAMS.HEIGHT - 110), src="send.png"))
         self.components.append(Image(self.screen, 'back.png', (25, 25), (25,25)))
         self.components.append(Image(self.screen, self.df["file"][self.round], (250, 250), ((PARAMS.WIDTH - 250) / 2, 50)))
         self.components.append(Toggle_letter(self.screen, self.df["word"][self.round], self.option, self.df["answer"][self.round]))
@@ -216,7 +213,7 @@ class Game_complete(Page):
         self.components[8].set_margins(((PARAMS.WIDTH - self.components[8].size[0])/2, PARAMS.HEIGHT - 110))
         # Eventos
         self.components[2].set_click(self.func_click(cancel=True))
-        self.components[2].set_hover(COLOR.ORANGE_DARK, COLOR.WHITE)
+        self.components[2].set_hover(COLOR.ORANGE, COLOR.WHITE)
         self.components[3].set_click(self.func_click())
         self.components[3].set_hover(COLOR.GREEN_DARK, COLOR.BLUE_DARK)
         self.components[4].set_click(self.func_back)
@@ -249,7 +246,6 @@ class Game_complete(Page):
             rank = rank.sort_values(by='score', ascending=False)
             #position = rank.index[rank['score'] == self.score].tolist()
             rank.to_csv(f"data/rank_{self.stage}.csv", sep=" ", index=False)
-
             self.play = 0
             self.func(Rank(self.screen, self.func, self.components[1].text, self.stage))
         else:

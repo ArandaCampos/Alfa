@@ -28,15 +28,15 @@ class Menu(Page):
         pass
 
     def init(self):
+        # Título
         self.components.append(Text(self.screen, 'ALFA', 90, COLOR.BLUE_DARK))
-        self.components[-1].init()
-        self.components[-1].set_margins(((PARAMS.WIDTH - self.components[-1].size[0])/ 2, 50))
+        self.components[0].init()
+        self.components[0].set_margins(((PARAMS.WIDTH - self.components[-1].size[0])/ 2, 50))
+        # Botões
         for index, option in enumerate(self.options):
             c, l = index % self.grid[0], index // self.grid[0]
             self.components.append(Button(
-                self.screen,
-                label=option, color_label=COLOR.BLUE_DARK,
-                size_box=self.size_box,color_box=COLOR.GREEN,
+                self.screen, label=option, size_box=self.size_box,
                 margin_box=(self.margin_menu[0] + self.space[0] * c, self.margin_menu[1] + self.space[1] * l)
             ))
             self.components[-1].init()

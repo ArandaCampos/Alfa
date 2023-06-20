@@ -76,12 +76,14 @@ class Basic_math(Component):
              return False
         return True
 
-    def toggle_value(self, value: int = None, increment: bool = False, decrement: bool = False):
+    def toggle_value(self, value: int = None, backspace: bool = False, increment: bool = False, decrement: bool = False):
         if value:
             if self.is_number(value):
-                self.answer = value
+                self.answer = str(self.answer) + str(value)
+        elif backspace:
+            self.answer = self.answer[0:-1] if len(self.answer) > 1 else "0"
         else:
-            self.answer = int(self.answer) + 1 if increment else int(self.answer) - 1
+            self.answer = str(int(self.answer) + 1) if increment else str(int(self.answer) - 1)
         self.components[1].text = self.answer
 
     def get_right(self):
@@ -135,7 +137,7 @@ class Game_math(Page):
         self.next_round()
 
     def func_back(self, event=None):
-        self.func(Menu_complete(self.screen, self.func))
+        self.func(Menu_math(self.screen, self.func))
 
     def func_click(self, cancel: bool = False):
         def click():
@@ -148,7 +150,9 @@ class Game_math(Page):
             self.components[5].toggle_value(increment=True)
         elif event.key == pygame.K_DOWN or event.key == pygame.K_LEFT:
             self.components[5].toggle_value(decrement=True)
-        elif event.key == pygame.K_RETURN:
+        elif event.key == pygame.K_BACKSPACE:
+            self.components[5].toggle_value(backspace=True)
+        elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
             self.get_result()
         else:
             self.components[5].toggle_value(value=event.unicode)

@@ -10,7 +10,7 @@
 
 &emsp;O jogador dispõe de uma imagem que ilustra a palavra a ser preenchida e um áudio, que lê o que estiver escrito no momento. Para alterar a síbala em destaque, o jogador poderá clicar as setas (`↑`, `↓`) ou a própria letra desejada (`A`-`Z`).
 
-![image](https://github.com/ArandaCampos/Alfa/assets/87876734/ce1571f5-2adc-471c-87f6-f7126be1b82a)
+![Captura de tela de 2023-06-20 11-48-55](https://github.com/ArandaCampos/Alfa/assets/87876734/e7046bb0-b34f-4e83-9322-01e5f5825adf)
 
 ## Instalação
 

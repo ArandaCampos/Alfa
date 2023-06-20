@@ -1,6 +1,6 @@
 import pygame
 import os, pandas as pd
-from animations import Blink, Wait
+from animations import Blink, Wait#, Move_to
 from constants import Colors, Params
 
 # Constantes
@@ -73,7 +73,7 @@ class Component():
         self.keydown = func
 
     def set_margins_center(self):
-        self.margins = ((PARAMS.WIDTH - self.size[0]) /2, (PARAMS.HEIGHT - self.size[1]) /2)
+        self.margins = [(PARAMS.WIDTH - self.size[0]) /2, (PARAMS.HEIGHT - self.size[1]) /2]
 
     def get_right(self):
         return self.margins[0] + self.size[0]
@@ -98,6 +98,13 @@ class Component():
 
     def set_wait(self, time: int, func):
         self.animations.append(Wait(time, func))
+
+    #def move(self, x, y):
+    #    self.margins[0] += x
+    #    self.margins[1] += y
+
+    #def set_move(self, time: int, x: int = None, y: int = None):
+    #    self.animations.append(Move_to(time, x0=self.margins[0], x=x, y0=self.margins[1], y=y, func=self.move))
 
     def play(self):
         if self.able:
@@ -192,11 +199,11 @@ class Button(Component):
     def __init__(self,
                  screen,
                  label: str = None,
-                 color_label: (int, int, int) = COLOR.WHITE,
+                 color_label: (int, int, int) = COLOR.BLUE_DARK,
                  size_label: int = 20,
                  size_box: (int, int) = (220, 75),
                  margin_box: (int, int) = (0,0),
-                 color_box: (int, int, int) = COLOR.ORANGE,
+                 color_box: (int, int, int) = COLOR.GREEN,
                  border_radius: int = 8,
                  src: str = None,
                  size_img: (int, int) =  (20, 20)
