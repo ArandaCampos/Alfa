@@ -1,6 +1,6 @@
 import os, time
-from complete import Game_complete, Menu_complete
-from basics_math import Menu_math
+from game_complete import Game_complete, Menu_complete
+from game_math import Menu_math
 from items import Button, Text, Page, Image
 from constants import Colors, Params
 

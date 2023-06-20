@@ -4,8 +4,7 @@
 # --------------------------------------------
 
 import os
-from items import Text, Button, Image, Page, Component
-from pages import Rank, Menu
+from items import Text, Button, Image, Page, Component, Rank, Menu
 from constants import Colors, Params
 
 try:

@@ -4,8 +4,7 @@
 # --------------------------------------------
 
 import os, random
-from items import Text, Button, Image, Page, Component
-from pages import Rank, Menu
+from items import Text, Button, Image, Page, Component, Rank, Menu
 from constants import Colors, Params
 
 try:
@@ -260,66 +259,12 @@ class Menu_math(Menu):
         def func_click():
             nonlocal number
             game = Game_math(self.screen, self.func)
-            print(number)
             game.set_stage(number)
             self.func(game)
         return func_click
 
-    def func_keydown(self, event):
-        if ord(event.unicode.upper()) in self.options:
-            game = Game_math(self.screen, self.func)
-            game.set_stage(event.unicode.lower())
-            self.func(game)
-
-class Window():
-    def __init__(self):
-
-        # Parâmetros da tela
-        self.screen = None
-        self.size = (PARAMS.WIDTH, PARAMS.HEIGHT)
-        # Páginas
-        self.page = None
-        # Parâmetros do jogo
-        self.play = True
-
-    def init(self):
-        self.screen = pygame.display.set_mode(self.size)
-        self.page = Menu_math(self.screen, self.change_page)
-        self.page.init()
-
-    def change_page(self, page):
-        self.page = page
-        self.page.init()
-
-    def refresh_screen(self):
-        self.page.refresh_screen()
-
-    def get_event(self):
-        for event in pygame.event.get():
-            self.page.get_event(event)
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                self.page = Goodbye(self.screen, self.change_page)
-                self.page.init()
-                self.page.refresh_screen()
-                time.sleep(2)
-                self.play = False
-
-    def exit(self):
-        pygame.quit()
-
-def run(window):
-    clock = pygame.time.Clock()
-
-    while window.play:
-        clock.tick(PARAMS.FPS)
-
-        window.refresh_screen()
-        window.get_event()
-
-    print('OBRIGADO POR JOGAR <3')
-    window.exit()
-
-if __name__ == '__main__':
-    window = Window()
-    window.init()
-    run(window)
+   #def func_keydown(self, event):
+   #    if ord(event.unicode.upper()) in self.options:
+   #        game = Game_math(self.screen, self.func)
+   #        game.set_stage(event.unicode.lower())
+   #        self.func(game)
