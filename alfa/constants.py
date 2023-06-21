@@ -1,4 +1,10 @@
-import pygame, os
+try:
+    import pygame
+except ImportError:
+    print('Erro ao importar o Pygame. Tente $ pip install pygame')
+    raise SystemExit
+
+import os
 pygame.init()
 
 class Colors():
@@ -30,8 +36,12 @@ class Params():
         # Áudio carregados
         self.SOUND_WIN = pygame.mixer.Sound(os.path.join(self.AUD_PATH, 'win.wav'))
         self.SOUND_FAIL = pygame.mixer.Sound(os.path.join(self.AUD_PATH, 'failed.wav'))
-        self.SOUND_READ = pygame.mixer.Sound('audio.mp3')
+        #self.SOUND_READ = pygame.mixer.music.load(os.path.join(self.ABS_PATH, 'audio.mp3'))
         # Parâmetros do jogo
         self.HEIGHT = 648
         self.WIDTH = 1000
         self.FPS = 60
+
+    def load_sound(self):
+        pygame.mixer.music.load(os.path.join(self.ABS_PATH, 'audio.mp3'))
+        pygame.mixer.music.play()
