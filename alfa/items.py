@@ -179,7 +179,6 @@ class Text(Component):
 class Box(Component):
     def __init__(self, screen, size, margins = (0, 0), color = COLOR.ORANGE, border_radius = 8):
         super().__init__(screen, size, margins)
-
         # Estilização
         self.color = color
         self.border_radius = border_radius
@@ -193,6 +192,24 @@ class Box(Component):
     def draw(self):
         if self.able:
             self.surface = pygame.draw.rect(self.screen, self.color, self.rendered, border_radius=self.border_radius)
+            self.play()
+
+class Circle(Component):
+    def __init__(self, screen, size = [0,0], margins = (0, 0), color = COLOR.ORANGE, radius: int = 20):
+        super().__init__(screen, size, margins)
+        # Estilização
+        self.color = color
+        self.radius = radius
+
+    def init(self):
+        self.size = [self.radius, self.radius]
+
+    def get_center(self) -> [int, int]:
+        return self.margins
+
+    def draw(self):
+        if self.able:
+            self.surface = pygame.draw.circle(self.screen, self.color, self.margins, self.radius)
             self.play()
 
 class Button(Component):

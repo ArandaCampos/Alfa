@@ -4,7 +4,7 @@
 # --------------------------------------------
 
 import os
-from items import Text, Component
+from items import Text, Component, Circle, Image
 from constants import Colors, Params
 
 try:
@@ -100,37 +100,88 @@ class Toggle_letter(Component):
             components.draw()
 
 class Basic_math(Component):
-    def __init__ (self, screen, op: str, result: str, size: int =  [0,0], margins: (int, int) = [0,0]):
+    def __init__ (self, screen, numbers: [int, int], op: str, result: str, size: int =  [0,0], margins: (int, int) = [0,0]):
         super().__init__(screen, size, margins)
 
         # Parâmetros do Jogo
+        self.numbers = numbers
         self.operation = op
-        self.answer = 0
+        self.answer = 1
         self.result = result
         self.components = []
+        self.pos_a = [
+            [210, 400], [245, 400], [280, 400],
+            [210, 365], [245, 365], [280, 365],
+            [210, 330], [245, 330], [280, 330]
+        ]
+        self.pos_b = [
+            [440, 400], [475, 400], [510, 400],
+            [440, 365], [475, 365], [510, 365],
+            [440, 330], [475, 330], [510, 330]
+        ]
+        self.pos_x = [
+            [682, 400], [717, 400], [752, 400], [787, 400],
+            [682, 365], [717, 365], [752, 365], [787, 365],
+            [682, 330], [717, 330], [752, 330], [787, 330],
+            [682, 295], [717, 295], [752, 295], [787, 295],
+                        [717, 260], [752, 260]
+        ]
         # Componentes
         self.sound_win = PARAMS.SOUND_WIN
         self.sound_fail = PARAMS.SOUND_FAIL
 
     def init(self):
+        """
+            +----------------------------+
+            | [0]     -   Operador       |
+            | [1]     -   Sinal de igual |
+            | [2]     -   Jarro 1        |
+            | [3]     -   Jarro 2        |
+            | [4]     -   Jarro 3        |
+            | [5-13]  -   1º numerador   |
+            | [14-22] -   2º numerador   |
+            | [23-40] -   resposta       |
+            +----------------------------+
+        """
         self.components = []
         self.components.append(Text(self.screen, self.operation, 80, COLOR.BLUE_DARK))
-        self.components.append(Text(self.screen, self.answer, 80, COLOR.ORANGE))
+        self.components.append(Text(self.screen, " = ", 80, COLOR.BLUE_DARK))
+        self.components.append(Image(self.screen, 'jar.png', (220, 220), (135, 220)))
+        self.components.append(Image(self.screen, 'jar.png', (220, 220), (365, 220)))
+        self.components.append(Image(self.screen, 'jar.png', (280, 280), (595, 160)))
+        for i, pos in enumerate(self.pos_a):
+            self.components.append(Circle(self.screen, margins=pos, color=COLOR.BLUE, radius=15))
+            self.components[-1].able = True if i < self.numbers[0] else False
+        for i, pos in enumerate(self.pos_b):
+            self.components.append(Circle(self.screen, margins=pos, color=COLOR.BLUE, radius=15))
+            self.components[-1].able = True if i < self.numbers[1] else False
+        for i, pos in enumerate(self.pos_x):
+            self.components.append(Circle(self.screen, margins=pos, color=COLOR.ORANGE, radius=15))
+            self.components[-1].able = True if i < self.answer else False
         for component in self.components:
             component.init()
         # Margens
-        self.margins = ((PARAMS.WIDTH - self.components[0].size[0] - self.components[1].size[0])/2, (PARAMS.HEIGHT - 80)/2)
-        self.size = self.components[-1].size
-        self.components[0].set_margins(self.margins)
-        self.components[1].set_margins((self.components[0].get_right(), self.margins[1]))
+        self.components[0].set_margins((300, 350 - self.components[0].size[1] /2))
+        self.components[1].set_margins((540, 350 - self.components[1].size[1] /2))
 
-    def next_round(self, op, result):
+    def next_round(self, numbers, op, result):
+        print(numbers)
+        self.numbers = numbers
         self.operation = op
-        self.answer = 0
+        self.answer = 1
         self.result = result
-        self.size = [0,0]
-        self.margins = [0,0]
-        self.init()
+        for i in range(5, 23):
+            self.components[i].color = COLOR.BLUE
+            self.components[i].able = False
+        for i in range(23, 41):
+            self.components[i].color = COLOR.ORANGE
+            self.components[i].able = False
+        self.components[23].able = True
+        for i in range(5, self.numbers[0] + 5):
+            self.components[i].able = True
+        for i in range(14, self.numbers[1] + 14):
+            print(i)
+            self.components[i].able = True
 
     def is_number(self, value):
         try:
@@ -139,24 +190,29 @@ class Basic_math(Component):
              return False
         return True
 
+    def draw_answer(self):
+        for i in range(18):
+            self.components[i + 23].able = True if i < self.answer else False
+
     def toggle_value(self, value: int = None, backspace: bool = False, increment: bool = False, decrement: bool = False):
-        if value:
+        if increment:
+            self.answer = self.answer + 1 if self.answer < 17 else 18
+        elif decrement:
+            self.answer = self.answer - 1 if self.answer > 1 else 0
+        elif value:
             if self.is_number(value):
-                self.answer = str(self.answer) + str(value)
-        elif backspace:
-            self.answer = self.answer[0:-1] if len(self.answer) > 1 else "0"
-        else:
-            self.answer = str(int(self.answer) + 1) if increment else str(int(self.answer) - 1)
-        self.components[1].text = self.answer
+                self.answer = int(value)
+        self.draw_answer()
 
     def get_right(self):
         return self.components[-1].get_right()
 
     def response(self, cancel: bool = False):
         response = int(self.result) == int(self.answer)
-        self.components[1].text = self.result
-        for component in self.components:
-            component.color = COLOR.GREEN_DARK
+        for i in range(5, len(self.components)):
+            self.components[i].color = COLOR.GREEN_DARK
+            if i >= 23:
+                self.components[i].able = True if i < self.result + 23 else False
         return response
 
     def draw(self):

@@ -36,7 +36,6 @@ class Params():
         # Áudio carregados
         self.SOUND_WIN = pygame.mixer.Sound(os.path.join(self.AUD_PATH, 'win.wav'))
         self.SOUND_FAIL = pygame.mixer.Sound(os.path.join(self.AUD_PATH, 'failed.wav'))
-        #self.SOUND_READ = pygame.mixer.music.load(os.path.join(self.ABS_PATH, 'audio.mp3'))
         # Parâmetros do jogo
         self.HEIGHT = 648
         self.WIDTH = 1000

@@ -316,6 +316,9 @@ class Game(Page):
 class Game_math(Game):
     def __init__(self, screen, func):
         super().__init__(screen, "MATEMÁTICA - ALFA", func)
+        self.result = 0
+        self.op = None
+        self.numbers = []
 
     def func_back(self, event=None):
         self.func(Menu_math(self.screen, self.func))
@@ -327,26 +330,31 @@ class Game_math(Game):
          +----------------------------+
         """
         self.load_data()
-        self.components.append(Basic_math(self.screen, self.op, self.result))
+        self.components.append(Basic_math(self.screen, self.numbers, self.op, self.result))
         self.components[6].init()
         # Marigins relativas
         self.components[6].set_margins(((PARAMS.WIDTH - self.components[6].size[0])/2, PARAMS.HEIGHT - 110))
         self.components[6].set_keydown(self.func_keydown)
 
     def load_data(self):
-        num1, num2 = random.randint(0, 9), random.randint(1, 9)
+        self.numbers = []
+        num1, num2 = random.randint(1, 9), random.randint(1, 9)
         if self.stage == "sum":
-            self.op = str(num1) + " + " + str(num2) + " = "
+            self.op = " + "
             self.result = num1 + num2
         elif self.stage == 'sub':
-            self.op = str(num1) + " - " + str(num2) + " = "
+            if num1 < num2:
+                num1, num2 = num2, num1
+            self.op = " - "
             self.result = num1 - num2
         elif self.stage == 'mul':
-            self.op = str(num1) + " x " + str(num2) + " = "
+            self.op = " x "
             self.result = num1 * num2
         elif self.stage == 'div':
-            self.op = str(num1 * num2) + " / " + str(num2) + " = "
+            self.op = " / "
             self.result = num1
+        self.numbers.append(num1)
+        self.numbers.append(num2)
 
     def func_to_menu(self, event):
         self.func(Menu_math(self.screen, self.func))
@@ -371,7 +379,7 @@ class Game_math(Game):
             # Próxima rodada
             self.round += 1
             self.load_data()
-            self.components[6].next_round(self.op, self.result)
+            self.components[6].next_round(self.numbers, self.op, self.result)
 
 class Game_complete(Game):
     def __init__(self, screen, func):
@@ -434,7 +442,7 @@ class Game_complete(Game):
             rank = pd.concat([rank, last_game], ignore_index=True)
             rank = rank.sort_values(by='score', ascending=False)
             rank.to_csv(f"data/rank_{self.stage}.csv", sep=" ", index=False)
-            print("Posição: " + str(rank.index[rank['score'] == int(self.components[1].text)].tolist()))
+            #print("Posição: " + str(rank.index[rank['score'] == int(self.components[1].text)].tolist()))
             self.play = 0
             self.func(Rank(self.screen, self.func, self.components[1].text, self.stage, self.func_to_menu))
         else:
