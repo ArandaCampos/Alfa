@@ -6,7 +6,7 @@
 import random
 from items import Text, Button, Image, Page, Component
 from constants import Colors, Params
-from games import Basic_math, Toggle_letter
+from games import Sum_sub, Toggle_letter, Div
 
 PARAMS, COLOR = Params(), Colors()
 
@@ -141,7 +141,7 @@ class Menu_complete(Menu):
     def __init__(self, screen, func):
         super().__init__(
             screen,
-            "MENU DE OPÇÕES - ALFA (MATEMÁTICA BÁSICA)",
+            "MENU DE OPÇÕES - ALFA (ALFABETIZAÇÃO)",
             func,
             [chr(65 + i) for i in range(25) if i not in [7, 10, 22, 24]],
             [chr(65 + i) for i in range(25) if i not in [7, 10, 22, 24]],
@@ -264,8 +264,6 @@ class Game(Page):
             self.components[6].toggle_value(increment=True)
         elif event.key == pygame.K_DOWN or event.key == pygame.K_LEFT:
             self.components[6].toggle_value(decrement=True)
-        elif event.key == pygame.K_BACKSPACE:
-            self.components[6].toggle_value(backspace=True)
         elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
             self.get_result()
         else:
@@ -330,7 +328,10 @@ class Game_math(Game):
          +----------------------------+
         """
         self.load_data()
-        self.components.append(Basic_math(self.screen, self.numbers, self.op, self.result))
+        if self.stage == 'sum' or self.stage == 'sub':
+            self.components.append(Sum_sub(self.screen, self.numbers, self.op, self.result))
+        elif self.stage == 'div':
+            self.components.append(Div(self.screen, self.numbers, self.op, self.result))
         self.components[6].init()
         # Marigins relativas
         self.components[6].set_margins(((PARAMS.WIDTH - self.components[6].size[0])/2, PARAMS.HEIGHT - 110))
@@ -338,21 +339,26 @@ class Game_math(Game):
 
     def load_data(self):
         self.numbers = []
-        num1, num2 = random.randint(1, 9), random.randint(1, 9)
-        if self.stage == "sum":
-            self.op = " + "
-            self.result = num1 + num2
-        elif self.stage == 'sub':
-            if num1 < num2:
-                num1, num2 = num2, num1
-            self.op = " - "
-            self.result = num1 - num2
-        elif self.stage == 'mul':
-            self.op = " x "
-            self.result = num1 * num2
-        elif self.stage == 'div':
-            self.op = " / "
-            self.result = num1
+        match self.stage:
+            case 'sum':
+                num1, num2 = random.randint(0, 9), random.randint(0, 9)
+                self.op = "+"
+                self.result = num1 + num2
+            case 'sub':
+                num1, num2 = random.randint(0, 9), random.randint(0, 9)
+                if num1 < num2:
+                    num1, num2 = num2, num1
+                self.op = "-"
+                self.result = num1 - num2
+            case 'mul':
+                num1, num2 = random.randint(1, 6), random.randint(0, 3)
+                self.op = "x"
+                self.result = num1 * num2
+            case 'div':
+                num1, num2 = random.randint(1, 4), random.randint(2, 4)
+                self.result = num1
+                num1 = num2 * num1
+                self.op = "/"
         self.numbers.append(num1)
         self.numbers.append(num2)
 
